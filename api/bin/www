@@ -8,12 +8,12 @@ var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
 const Database = require("../db/Database.js")
-const {CONNECTION_STRING} = require("../config/index.js")
+const {CONNECTION_STRING,PORT} = require("../config/index.js")
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(PORT);
 app.set('port', port);
 
 /**
