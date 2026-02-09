@@ -5,7 +5,7 @@ const schema = mongoose.Schema({
     email:{type:String},
     location:{type:String},
     proc_type:{type:String},
-    log:{type:String},
+    log:{type:mongoose.SchemaTypes.Mixed},
 },{
     versionKey:false,
     timestamps:{

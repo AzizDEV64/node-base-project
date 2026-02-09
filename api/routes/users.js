@@ -8,13 +8,15 @@ const Enum = require("../config/enum.js")
 const bcrypt = require("bcrypt")
 const is = require("is_js");
 const UserRoles = require('../db/models/UserRoles.js');
-
+const Auditlogs = require("../lib/auditlogs.js")
+const logger = require("../lib/logger/LoggerClass.js")
 
 router.get('/', async (req, res) => {
     try {
         let users = await Users.find({})
         res.json(Response.successResponse(users));
     } catch (error) {
+        logger.error(req.user?.email, "Users", "List", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -31,11 +33,11 @@ router.post('/add', async (req, res) => {
         let roles = await Roles.find({ _id: { $in: body.roles } })
         if (roles.length == 0) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "roles field must be an array!")
 
-        let password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
+        let password1 = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
 
         const user = await Users.create({
             email: body.email,
-            password: password,
+            password: password1,
             is_active: true,
             first_name: body.first_name,
             last_name: body.last_name,
@@ -48,8 +50,16 @@ router.post('/add', async (req, res) => {
                 user_id: user._id
             })
         }
+
+        const plainUser = user.toObject()     
+        const { password, ...safeUser } = plainUser
+
+        Auditlogs.info(req.user?.email, "Users", "Add", safeUser)
+        logger.info(req.user?.email, "Users", "Add", JSON.stringify(safeUser))
+
         res.json(Response.successResponse(user));
     } catch (error) {
+        logger.error(req.user?.email, "Users", "Add", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -86,9 +96,15 @@ router.put('/update', async (req, res) => {
         }
 
         let user = await Users.updateOne({ _id: body._id }, updates)
-
+        let updatedUser = await Users.findOne({_id:body._id})
+        const plainUser = updatedUser.toObject()     
+        const { password, ...safeUser } = plainUser
+        
+        Auditlogs.info(req.user?.email, "Users", "Update", safeUser)
+        logger.info(req.user?.email, "Users", "Update", JSON.stringify(safeUser))
         res.json(Response.successResponse(user));
     } catch (error) {
+        logger.error(req.user?.email, "Users", "Update", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -101,8 +117,12 @@ router.delete('/delete', async (req, res) => {
         let user = await Users.deleteOne({ _id: body._id })
         await UserRoles.deleteMany({user_id:body._id})
 
-        res.json(Response.successResponse(user));
+        res.json(Response.successResponse(user))
+
+        Auditlogs.info(req.user?.email, "Users", "Delete", { _id: body._id })
+        logger.info(req.user?.email, "Users", "Delete", JSON.stringify({ _id: body._id }))
     } catch (error) {
+        logger.error(req.user?.email, "Users", "Delete", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -142,6 +162,7 @@ router.post('/register', async (req, res) => {
         })
         res.json(Response.successResponse(user));
     } catch (error) {
+        logger.error(req.user?.email, "Users", "Register", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }

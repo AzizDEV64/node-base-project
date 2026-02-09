@@ -5,7 +5,9 @@ const RolePrivileges = require("../db/models/RolePrivileges.js")
 const Response = require("../lib/Response.js")
 const CustomError = require("../lib/Error.js")
 const Enum = require("../config/enum.js");
-const role_privileges = require('../lib/role_privileges.js');
+const role_privileges = require('../config/role_privileges.js');
+const logger = require("../lib/logger/LoggerClass.js")
+const Auditlogs = require("../lib/auditlogs.js")
 
 
 router.get('/', async (req, res) => {
@@ -13,6 +15,7 @@ router.get('/', async (req, res) => {
         let roles = await Roles.find({})
         res.json(Response.successResponse(roles));
     } catch (error) {
+        logger.error(req.user?.email, "Roles", "List", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -35,12 +38,17 @@ router.post('/add', async (req, res) => {
                 permissions: body.permissions[i],
                 created_by: req.user?.id
             })
-            console.log(role_privs)
             await role_privs.save()
         }
+
+        Auditlogs.info(req.user?.email, "Roles", "Add", {role,permissions:body.permissions})
+        logger.info(req.user?.email, "Roles", "Add", JSON.stringify({role,permissions:body.permissions}))
+
         res.json(Response.successResponse(role));
     } catch (error) {
         // console.error(error)
+        
+        logger.error(req.user?.email, "Roles", "Add", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -55,10 +63,8 @@ router.put('/update', async (req, res) => {
         if (body.permissions && Array.isArray(body.permissions)) {
             console.log(body)
 
-            // 1) Eski izinleri temizle
-            await RolePrivileges.deleteMany({ role_id: body._id });
+            await RolePrivileges.deleteMany({ role_id: body._id })
 
-            // 2) Yeni izinleri ekle
             if (body.permissions.length > 0) {
                 const newDocs = body.permissions.map(p => ({
                     role_id: body._id,
@@ -66,13 +72,17 @@ router.put('/update', async (req, res) => {
                     created_by: req.user?.id
                 }));
 
-                await RolePrivileges.insertMany(newDocs);
+                await RolePrivileges.insertMany(newDocs)
             }
         }
 
         let roles = await Roles.updateOne({ _id: body._id }, updates)
+
+        Auditlogs.info(req.user?.email, "Roles", "Update", {_id: body._id,updates,permissions:body.permissions})
+        logger.info(req.user?.email, "Roles", "Update", JSON.stringify({_id: body._id,updates,permissions:body.permissions}))
         res.json(Response.successResponse(roles));
     } catch (error) {
+        logger.error(req.user?.email, "Roles", "Update", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
@@ -84,8 +94,13 @@ router.put('/update', async (req, res) => {
             if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
             let roles = await Roles.deleteOne({ _id: body._id })
             await RolePrivileges.deleteMany({role_id:body._id})
+
+            Auditlogs.info(req.user?.email, "Roles", "Delete", {_id: body._id})
+            logger.info(req.user?.email, "Roles", "Delete", JSON.stringify({_id: body._id}))
+
             res.json(Response.successResponse(roles));
         } catch (error) {
+            logger.error(req.user?.email, "Roles", "Delete", error.message)
             let errorResponse = Response.errorResponse(error)
             res.status(errorResponse.code).json(errorResponse);
         }
