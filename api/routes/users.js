@@ -10,6 +10,74 @@ const is = require("is_js");
 const UserRoles = require('../db/models/UserRoles.js');
 const Auditlogs = require("../lib/auditlogs.js")
 const logger = require("../lib/logger/LoggerClass.js")
+const jwt = require("jsonwebtoken")
+const config = require("../config/index.js")
+const auth = require("../lib/auth.js")()
+
+
+router.post('/register', async (req, res) => {
+    let body = req.body
+    try {
+        let users = await Users.find({})
+        if (users.length != 0) {
+            return res.sendStatus(Enum.HTTP_CODES.NOT_FOUND)
+        }
+
+        if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
+        if (!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password field must be filled!")
+        if (body.password.length < 8) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password length must be greater than 8!")
+        if (!is.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be an email!")
+
+        let password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
+
+        const user = await Users.create({
+            email: body.email,
+            password: password,
+            is_active: true,
+            first_name: body.first_name,
+            last_name: body.last_name,
+            phone_number: body.phone_number,
+        })
+        const role = await Roles.create({
+            role_name: Enum.SUPER_ADMIN,
+            created_by: user._id
+        })
+
+        await UserRoles.create({
+            role_id: role._id,
+            user_id: user._id
+        })
+        res.json(Response.successResponse(user));
+    } catch (error) {
+        logger.error(req.user?.email, "Users", "Register", error.message)
+        let errorResponse = Response.errorResponse(error)
+        res.status(errorResponse.code).json(errorResponse);
+    }
+})
+
+router.post('/login', async (req, res) => {
+    try {
+        let {password,email} = req.body
+        if(password.length < 8 || typeof password !== "string" || is.not.email(email)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
+        let user = await Users.findOne({email})
+        if(!user) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error!", "email or password wrong")
+        let pass = bcrypt.compareSync(password,user.password)
+        if(pass == false) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error!", "email or password wrong")
+        let payload = {
+            id:user._id,
+        }
+        let token = jwt.sign(payload,config.JWT_KEY,{expiresIn:"1d"})
+        res.json(Response.successResponse({token,user:{_id:user._id, email:user.email, first_name:user.first_name, last_name:user.last_name}}));
+    } catch (error) {
+        logger.error(req.user?.email, "Users", "Login", error.message)
+        let errorResponse = Response.errorResponse(error)
+        res.status(errorResponse.code).json(errorResponse);
+    }
+})
+
+router.all("*",auth.authenticate(),(req,res,next) => {
+  next()
+})
 
 router.get('/', async (req, res) => {
     try {
@@ -20,7 +88,8 @@ router.get('/', async (req, res) => {
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
-});
+})
+
 router.post('/add', async (req, res) => {
     let body = req.body
     try {
@@ -63,9 +132,7 @@ router.post('/add', async (req, res) => {
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
-});
-
-
+})
 
 router.put('/update', async (req, res) => {
     let body = req.body
@@ -108,7 +175,7 @@ router.put('/update', async (req, res) => {
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
-});
+})
 
 router.delete('/delete', async (req, res) => {
     let body = req.body
@@ -126,46 +193,8 @@ router.delete('/delete', async (req, res) => {
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).json(errorResponse);
     }
-});
+})
 
-router.post('/register', async (req, res) => {
-    let body = req.body
-    try {
-        let users = await Users.find({})
-        if (users.length != 0) {
-            return res.sendStatus(Enum.HTTP_CODES.NOT_FOUND)
-        }
 
-        if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
-        if (!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password field must be filled!")
-        if (body.password.length < 8) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password length must be greater than 8!")
-        if (!is.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be an email!")
-
-        let password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
-
-        const user = await Users.create({
-            email: body.email,
-            password: password,
-            is_active: true,
-            first_name: body.first_name,
-            last_name: body.last_name,
-            phone_number: body.phone_number,
-        })
-        const role = await Roles.create({
-            role_name: Enum.SUPER_ADMIN,
-            created_by: user._id
-        })
-
-        await UserRoles.create({
-            role_id: role._id,
-            user_id: user._id
-        })
-        res.json(Response.successResponse(user));
-    } catch (error) {
-        logger.error(req.user?.email, "Users", "Register", error.message)
-        let errorResponse = Response.errorResponse(error)
-        res.status(errorResponse.code).json(errorResponse);
-    }
-});
 
 module.exports = router;

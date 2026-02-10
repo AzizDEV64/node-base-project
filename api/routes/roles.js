@@ -8,7 +8,10 @@ const Enum = require("../config/enum.js");
 const role_privileges = require('../config/role_privileges.js');
 const logger = require("../lib/logger/LoggerClass.js")
 const Auditlogs = require("../lib/auditlogs.js")
-
+const auth = require("../lib/auth.js")()
+router.all("*",auth.authenticate(),(req,res,next) => {
+  next()
+})
 
 router.get('/', async (req, res) => {
     try {

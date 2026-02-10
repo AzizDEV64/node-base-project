@@ -6,15 +6,18 @@ const CustomError = require("../lib/Error.js")
 const Enum = require("../config/enum.js")
 const moment = require("moment")
 const logger = require("../lib/logger/LoggerClass.js")
-
+const auth = require("../lib/auth.js")()
+router.all("*",auth.authenticate(),(req,res,next) => {
+  next()
+})
 router.post('/', async (req, res) => {
     let body = req.body
     try {
       let query = {}
       let skip = body.skip
       let limit = body.limit
-      if(typeof skip !== "numeric") skip = 0
-      if(typeof limit !== "numeric" || limit > 500) limit = 500
+      if(typeof skip !== "number") skip = 0
+      if(typeof limit !== "number" || limit > 500) limit = 500
 
       if(body.begin_date && body.end_date){
         query.created_at = {
