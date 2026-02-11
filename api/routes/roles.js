@@ -13,7 +13,7 @@ router.all("*",auth.authenticate(),(req,res,next) => {
   next()
 })
 
-router.get('/', async (req, res) => {
+router.get('/',auth.checkRoles(["role_view"]), async (req, res) => {
     try {
         let roles = await Roles.find({})
         res.json(Response.successResponse(roles));
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
         res.status(errorResponse.code).json(errorResponse);
     }
 });
-router.post('/add', async (req, res) => {
+router.post('/add',auth.checkRoles(["role_add"]), async (req, res) => {
     let body = req.body
     try {
         if (!body.role_name) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "role_name field must be filled!")
@@ -56,7 +56,7 @@ router.post('/add', async (req, res) => {
         res.status(errorResponse.code).json(errorResponse);
     }
 });
-router.put('/update', async (req, res) => {
+router.put('/update',auth.checkRoles(["role_update"]), async (req, res) => {
     let body = req.body
     try {
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
@@ -64,7 +64,6 @@ router.put('/update', async (req, res) => {
         if (body.role_name) updates.role_name = body.role_name
         if (typeof body.is_active === "boolean") updates.is_active = body.is_active
         if (body.permissions && Array.isArray(body.permissions)) {
-            console.log(body)
 
             await RolePrivileges.deleteMany({ role_id: body._id })
 
@@ -78,9 +77,10 @@ router.put('/update', async (req, res) => {
                 await RolePrivileges.insertMany(newDocs)
             }
         }
-
+        
         let roles = await Roles.updateOne({ _id: body._id }, updates)
-
+        
+        // console.log(roles)
         Auditlogs.info(req.user?.email, "Roles", "Update", {_id: body._id,updates,permissions:body.permissions})
         logger.info(req.user?.email, "Roles", "Update", JSON.stringify({_id: body._id,updates,permissions:body.permissions}))
         res.json(Response.successResponse(roles));
@@ -91,7 +91,7 @@ router.put('/update', async (req, res) => {
     }
 });
 
-    router.delete('/delete', async (req, res) => {
+    router.delete('/delete', auth.checkRoles(["role_delete"]), async (req, res) => {
         let body = req.body
         try {
             if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
