@@ -5,7 +5,8 @@ const Response = require("../lib/Response.js")
 const CustomError = require("../lib/Error.js")
 const Enum = require("../config/enum.js")
 const Auditlogs = require("../lib/auditlogs.js")
-const logger = require("../lib/logger/LoggerClass.js")
+const logger = require("../lib/logger/LoggerClass.js");
+const emitter = require('../lib/Emitter.js');
 const auth = require("../lib/auth.js")()
 router.all("*",auth.authenticate(),(req,res,next) => {
   next()
@@ -32,7 +33,7 @@ router.post('/add',auth.checkRoles(["category_add"]), async (req, res) => {
             is_active: true,
             created_by: req.user?.id
         })
-
+        emitter.getEmitter("notifications").emit("messages",{message:category.name + "is added"})
         Auditlogs.info(req.user?.email, "Categories", "Add", category)
         logger.info(req.user?.email, "Categories", "Add", category)
 
