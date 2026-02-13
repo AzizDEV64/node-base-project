@@ -102,5 +102,11 @@ module.exports = {
             group:"AUDITLOGS",
             description:"Auditlogs view"
         },
+        {
+            key:"category_export",
+            name:"Category Exports",
+            group:"CATEGORIES",
+            description:"Category exports"
+        }
     ]
 }

@@ -8,6 +8,9 @@ const Auditlogs = require("../lib/auditlogs.js")
 const logger = require("../lib/logger/LoggerClass.js");
 const emitter = require('../lib/Emitter.js');
 const auth = require("../lib/auth.js")()
+const excelExport = new (require("../lib/Export.js"))()
+const fs = require("fs")
+
 router.all("*",auth.authenticate(),(req,res,next) => {
   next()
 })
@@ -84,5 +87,29 @@ router.delete('/delete', auth.checkRoles(["category_delete"]),async (req, res) =
         res.status(errorResponse.code).json(errorResponse);
     }
 });
+
+router.post('/export', auth.checkRoles(["category_export"]), async (req, res) => {
+    try {
+        let categories = await Categories.find({}).populate("created_by")
+        console.log(categories[0].created_by)
+        let excel = excelExport.toExcel(
+            ["NAME","IS ACTIVE","CREATED BY","CREATED AT","UPDATED AT"],
+            ["name","is_active","created_by","created_at","updated_at"],
+            categories
+        )
+        let filePath = __dirname + "/../tmp/categories_sheet" + Date.now()
+        fs.writeFileSync(filePath,excel,"UTF-8")
+        res.download(filePath)
+        setTimeout(()=>{
+            fs.unlinkSync(filePath)
+        },2000)
+
+    } catch (error) {
+        logger.error(req.user?.email, "Categories", "List", error.message)
+        let errorResponse = Response.errorResponse(error)
+        res.status(errorResponse.code).json(errorResponse);
+    }
+});
+
 
 module.exports = router;
