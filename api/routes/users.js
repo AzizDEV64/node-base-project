@@ -13,7 +13,19 @@ const logger = require("../lib/logger/LoggerClass.js")
 const jwt = require("jsonwebtoken")
 const config = require("../config/index.js")
 const auth = require("../lib/auth.js")()
+const {rateLimit} = require("express-rate-limit")
+const MongoStore = require("rate-limit-mongo")
 
+
+const limiter = rateLimit({ //for login brute-force
+    store: new MongoStore({
+    uri: config.CONNECTION_STRING,
+    expireTimeMs: 5 * 60 * 1000,
+    }),
+	windowMs: 5 * 60 * 1000, // 15 minutes
+	limit: 5, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+})
 
 router.post('/register', async (req, res) => {
     let body = req.body
@@ -55,7 +67,7 @@ router.post('/register', async (req, res) => {
     }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', limiter, async (req, res) => {
     try {
         let {password,email} = req.body
         if(password.length < 8 || typeof password !== "string" || is.not.email(email)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
