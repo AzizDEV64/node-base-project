@@ -81,7 +81,13 @@ router.all("*",auth.authenticate(),(req,res,next) => {
 
 router.get('/',auth.checkRoles(["user_view"]), async (req, res) => {
     try {
-        let users = await Users.find({})
+        let users = await Users.find({},{password:0}).lean()
+        for(let user of users){
+            let userRoles = await UserRoles.find({user_id:user._id})
+            for(let userRole of userRoles){
+                user.roles = await Roles.find({_id:userRole.role_id})
+            }
+        }
         res.json(Response.successResponse(users));
     } catch (error) {
         logger.error(req.user?.email, "Users", "List", error.message)
