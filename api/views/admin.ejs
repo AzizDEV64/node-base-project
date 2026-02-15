@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/stylesheets/style2.css" />
+</head>
+<body>
+
+  <div class="admin-wrapper">
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('show');"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">⬡</div>
+        Admin Panel
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+
+        <a class="nav-item active" href="#dashboard" onclick="navigate('dashboard')">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <div class="nav-label">Management</div>
+        <% if(["user_view", "user_update","user_add","user_delete"].some(r => userPermissionsName.includes(r))){ %> 
+          <a class="nav-item" href="#users" onclick="navigate('users')">
+            <span class="nav-icon">👥</span> Users
+          </a>
+        <% } %>
+        <% if(["role_view", "role_update","role_add","role_delete"].some(r => userPermissionsName.includes(r))){ %>
+        <a class="nav-item" href="#roles" onclick="navigate('roles')">
+          <span class="nav-icon">🛡️</span> Roles
+        </a>
+        <% } %>
+        <% if(["category_view", "category_update","category_add","category_delete","category_export"].some(r => userPermissionsName.includes(r))){ %>
+        <a class="nav-item" href="#categories" onclick="navigate('categories')">
+          <span class="nav-icon">📂</span> Categories
+        </a>
+        <% } %>
+         <% if(["role_view", "role_update","role_add","role_delete"].some(r => userPermissionsName.includes(r))){ %>
+        <a class="nav-item" href="#rolePrivileges" onclick="navigate('rolePrivileges')">
+          <span class="nav-icon">🔑</span> Role Privileges
+        </a>
+        <% } %>
+        <% if(["auditlogs_view"].some(r => userPermissionsName.includes(r))){ %>
+        <div class="nav-label">System</div>
+        <a class="nav-item" href="#auditLogs" onclick="navigate('auditLogs')">
+          <span class="nav-icon">📋</span> Audit Logs
+        </a>
+        <% } %>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="logout-btn" href="/api/admin/logout">
+          <span>🚪</span> Logout
+        </a>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main-wrapper">
+      <!-- Navbar -->
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('show');">☰</button>
+          <span class="navbar-title" id="navTitle">Dashboard</span>
+        </div>
+        <div class="navbar-right">
+          <div class="navbar-avatar" title="Admin">A</div>
+        </div>
+      </header>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Dashboard                                           -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-dashboard">
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="card-icon purple">👥</div>
+            <div class="card-value">12</div>
+            <div class="card-label">Total Users · 8 active</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon green">🛡️</div>
+            <div class="card-value">8</div>
+            <div class="card-label">Roles · 6 active</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon amber">📂</div>
+            <div class="card-value">10</div>
+            <div class="card-label">Categories · 7 active</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon rose">🔑</div>
+            <div class="card-value">8</div>
+            <div class="card-label">Role Privileges</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon sky">📋</div>
+            <div class="card-value">15</div>
+            <div class="card-label">Audit Logs · 3 errors</div>
+          </div>
+          <div class="dash-card">
+            <div class="card-icon teal">🔗</div>
+            <div class="card-value">8</div>
+            <div class="card-label">User–Role Assignments</div>
+          </div>
+        </div>
+        
+        <% if(["auditlogs_view"].some(r => userPermissionsName.includes(r))){ %>
+        <div class="section-header"><span class="section-title">Recent Audit Logs</span></div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Level</th><th>Email</th><th>Location</th><th>Type</th><th>Log</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/users</td><td>GET</td><td>Fetched user list</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/users/1</td><td>PUT</td><td>Updated user profile</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-warn">warn</span></td>
+                <td>editor@demo.com</td><td>/api/categories</td><td>POST</td><td>Attempted duplicate category creation</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-error">error</span></td>
+                <td>viewer@demo.com</td><td>/api/roles</td><td>DELETE</td><td>Unauthorized delete attempt</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>manager@demo.com</td><td>/api/login</td><td>POST</td><td>Successful login</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <% } %> 
+      </main>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Users                                               -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-users" style="display:none;">
+
+        <div class="section-header">
+          <span class="section-title">Users</span>
+          <div class="toolbar">
+            <input class="search-box" type="text" placeholder="Search users…" />
+            <button class="btn btn-primary">＋ Add User</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Email</th><th>First Name</th><th>Last Name</th><th>Phone</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>admin@demo.com</td><td>Ali</td><td>Yılmaz</td><td>+90 532 111 2233</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>editor@demo.com</td><td>Ayşe</td><td>Kaya</td><td>+90 533 222 3344</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>viewer@demo.com</td><td>Mehmet</td><td>Demir</td><td>+90 534 333 4455</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>manager@demo.com</td><td>Zeynep</td><td>Çelik</td><td>+90 535 444 5566</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>support@demo.com</td><td>Emre</td><td>Arslan</td><td>+90 536 555 6677</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>dev@demo.com</td><td>Elif</td><td>Öztürk</td><td>+90 537 666 7788</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>test@demo.com</td><td>Burak</td><td>Şahin</td><td>+90 538 777 8899</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>qa@demo.com</td><td>Selin</td><td>Aydın</td><td>+90 539 888 9900</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>hr@demo.com</td><td>Can</td><td>Koç</td><td>+90 540 999 0011</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>finance@demo.com</td><td>Deniz</td><td>Yıldız</td><td>+90 541 000 1122</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>ops@demo.com</td><td>Oğuz</td><td>Kurt</td><td>+90 542 111 2233</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>legal@demo.com</td><td>İpek</td><td>Aksoy</td><td>+90 543 222 3344</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–12 of 12</span>
+            <div class="pagination-btns"><button class="page-btn active">1</button></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Roles                                               -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-roles" style="display:none;">
+
+        <div class="section-header">
+          <span class="section-title">Roles</span>
+          <div class="toolbar">
+            <input class="search-box" type="text" placeholder="Search roles…" />
+            <button class="btn btn-primary">＋ Add Role</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Role Name</th><th>Status</th><th>Created By</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Super Admin</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Editor</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Viewer</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Manager</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Support Agent</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Developer</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>manager@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>QA Tester</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>manager@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>HR Staff</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–8 of 8</span>
+            <div class="pagination-btns"><button class="page-btn active">1</button></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Categories                                          -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-categories" style="display:none;">
+
+        <div class="section-header">
+          <span class="section-title">Categories</span>
+          <div class="toolbar">
+            <input class="search-box" type="text" placeholder="Search categories…" />
+            <button class="btn btn-primary">＋ Add Category</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Name</th><th>Status</th><th>Created By</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Electronics</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Clothing</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>editor@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Books</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Home &amp; Garden</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Sports</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>editor@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Automotive</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Health &amp; Beauty</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>manager@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Toys</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>editor@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Food &amp; Beverage</td>
+                <td><span class="badge badge-active">Active</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Office Supplies</td>
+                <td><span class="badge badge-inactive">Inactive</span></td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–10 of 10</span>
+            <div class="pagination-btns"><button class="page-btn active">1</button></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Role Privileges                                     -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-rolePrivileges" style="display:none;">
+
+        <div class="section-header">
+          <span class="section-title">Role Privileges</span>
+          <div class="toolbar">
+            <input class="search-box" type="text" placeholder="Search privileges…" />
+            <button class="btn btn-primary">＋ Add Role Privilege</button>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Role</th><th>Permissions</th><th>Created By</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Super Admin</td>
+                <td>users:read,write,delete | roles:read,write,delete | categories:read,write,delete | logs:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Editor</td>
+                <td>users:read | categories:read,write | logs:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Viewer</td>
+                <td>users:read | categories:read | logs:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Manager</td>
+                <td>users:read,write | roles:read | categories:read,write | logs:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Support Agent</td>
+                <td>users:read | categories:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>Developer</td>
+                <td>users:read | categories:read,write,delete | logs:read</td>
+                <td>manager@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>QA Tester</td>
+                <td>users:read | categories:read | logs:read</td>
+                <td>manager@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+              <tr>
+                <td>HR Staff</td>
+                <td>users:read</td>
+                <td>admin@demo.com</td>
+                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–8 of 8</span>
+            <div class="pagination-btns"><button class="page-btn active">1</button></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
+      <!--  SECTION: Audit Logs                                          -->
+      <!-- ============================================================= -->
+      <main class="content section" id="section-auditLogs" style="display:none;">
+
+        <div class="section-header">
+          <span class="section-title">Audit Logs</span>
+          <div class="toolbar">
+            <input class="search-box" type="text" placeholder="Search logs…" />
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr><th>Level</th><th>Email</th><th>Location</th><th>Type</th><th>Log</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/users</td><td>GET</td><td>Fetched user list</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/users/1</td><td>PUT</td><td>Updated user profile</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-warn">warn</span></td>
+                <td>editor@demo.com</td><td>/api/categories</td><td>POST</td><td>Attempted duplicate category creation</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-error">error</span></td>
+                <td>viewer@demo.com</td><td>/api/roles</td><td>DELETE</td><td>Unauthorized delete attempt</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>manager@demo.com</td><td>/api/login</td><td>POST</td><td>Successful login</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-debug">debug</span></td>
+                <td>dev@demo.com</td><td>/api/roles/6</td><td>GET</td><td>Debug: role cache miss</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-warn">warn</span></td>
+                <td>support@demo.com</td><td>/api/users/5</td><td>PUT</td><td>Rate limit approaching</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/categories/1</td><td>PUT</td><td>Category updated</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-error">error</span></td>
+                <td>test@demo.com</td><td>/api/privileges</td><td>POST</td><td>Validation failed: missing role_id</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>admin@demo.com</td><td>/api/logout</td><td>POST</td><td>User logged out</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-debug">debug</span></td>
+                <td>dev@demo.com</td><td>/api/health</td><td>GET</td><td>Health check OK</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-warn">warn</span></td>
+                <td>hr@demo.com</td><td>/api/users</td><td>POST</td><td>Weak password detected</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>finance@demo.com</td><td>/api/reports</td><td>GET</td><td>Report generated</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-error">error</span></td>
+                <td>ops@demo.com</td><td>/api/deploy</td><td>POST</td><td>Deployment failed: timeout</td>
+              </tr>
+              <tr>
+                <td><span class="log-level log-info">info</span></td>
+                <td>legal@demo.com</td><td>/api/login</td><td>POST</td><td>Login attempt – account inactive</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="pagination-info">Showing 1–15 of 15</span>
+            <div class="pagination-btns"><button class="page-btn active">1</button></div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Minimal inline JS: only sidebar navigation (show/hide sections) -->
+  <script>
+    const titles = {
+      dashboard: 'Dashboard', users: 'Users', roles: 'Roles',
+      categories: 'Categories', rolePrivileges: 'Role Privileges', auditLogs: 'Audit Logs'
+    };
+    function navigate(section) {
+      document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+      document.getElementById('section-' + section).style.display = '';
+      document.getElementById('navTitle').textContent = titles[section] || section;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('show');
+    }
+  </script>
+
+</body>
+</html>

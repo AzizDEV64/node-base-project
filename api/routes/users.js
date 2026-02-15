@@ -13,18 +13,18 @@ const logger = require("../lib/logger/LoggerClass.js")
 const jwt = require("jsonwebtoken")
 const config = require("../config/index.js")
 const auth = require("../lib/auth.js")()
-const {rateLimit} = require("express-rate-limit")
+const { rateLimit } = require("express-rate-limit")
 const MongoStore = require("rate-limit-mongo")
 
 
 const limiter = rateLimit({ //for login brute-force
     store: new MongoStore({
-    uri: config.CONNECTION_STRING,
-    expireTimeMs: 5 * 60 * 1000,
+        uri: config.CONNECTION_STRING,
+        expireTimeMs: 5 * 1000,
     }),
-	windowMs: 5 * 60 * 1000, // 15 minutes
-	limit: 5, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+    windowMs: 5 * 1000, // 5 minutes
+    limit: 5, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 })
 
 router.post('/register', async (req, res) => {
@@ -68,36 +68,41 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', limiter, async (req, res) => {
+    let { password, email } = req.body
     try {
-        let {password,email} = req.body
-        if(password.length < 8 || typeof password !== "string" || is.not.email(email)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
-        let user = await Users.findOne({email})
-        if(!user) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error!", "email or password wrong")
-        let pass = bcrypt.compareSync(password,user.password)
-        if(pass == false) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED,"Validation Error!", "email or password wrong")
+        if (password.length < 8 || typeof password !== "string" || is.not.email(email)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
+        let user = await Users.findOne({ email })
+        if (!user) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
+        let pass = bcrypt.compareSync(password, user.password)
+        if (pass == false) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, "Validation Error!", "email or password wrong")
         let payload = {
-            id:user._id,
+            id: user._id,
         }
-        let token = jwt.sign(payload,config.JWT_KEY,{expiresIn:"1d"})
-        res.json(Response.successResponse({token,user:{_id:user._id, email:user.email, first_name:user.first_name, last_name:user.last_name}}));
+        let token = jwt.sign(payload, config.JWT_KEY, { expiresIn: "1d" })
+        res.cookie("jsonwebtoken",token,{
+            maxAge:1000 * 60 * 60 * 24,
+            httpOnly:true
+        })
+        return res.redirect("/api/admin/panel");
     } catch (error) {
+        console.log(email,password)
         logger.error(req.user?.email, "Users", "Login", error.message)
         let errorResponse = Response.errorResponse(error)
-        res.status(errorResponse.code).json(errorResponse);
+        res.status(errorResponse.code).render("login",{errorResponse,email});
     }
 })
 
-router.all("*",auth.authenticate(),(req,res,next) => {
-  next()
+router.all("*", auth.authenticate(), (req, res, next) => {
+    next()
 })
 
-router.get('/',auth.checkRoles(["user_view"]), async (req, res) => {
+router.get('/', auth.checkRoles(["user_view"]), async (req, res) => {
     try {
-        let users = await Users.find({},{password:0}).lean()
-        for(let user of users){
-            let userRoles = await UserRoles.find({user_id:user._id})
-            for(let userRole of userRoles){
-                user.roles = await Roles.find({_id:userRole.role_id})
+        let users = await Users.find({}, { password: 0 }).lean()
+        for (let user of users) {
+            let userRoles = await UserRoles.find({ user_id: user._id })
+            for (let userRole of userRoles) {
+                user.roles = await Roles.find({ _id: userRole.role_id })
             }
         }
         res.json(Response.successResponse(users));
@@ -108,7 +113,7 @@ router.get('/',auth.checkRoles(["user_view"]), async (req, res) => {
     }
 })
 
-router.post('/add',auth.checkRoles(["user_add"]), async (req, res) => {
+router.post('/add', auth.checkRoles(["user_add"]), async (req, res) => {
     let body = req.body
     try {
         if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
@@ -138,7 +143,7 @@ router.post('/add',auth.checkRoles(["user_add"]), async (req, res) => {
             })
         }
 
-        const plainUser = user.toObject()     
+        const plainUser = user.toObject()
         const { password, ...safeUser } = plainUser
 
         Auditlogs.info(req.user?.email, "Users", "Add", safeUser)
@@ -152,7 +157,7 @@ router.post('/add',auth.checkRoles(["user_add"]), async (req, res) => {
     }
 })
 
-router.put('/update',auth.checkRoles(["user_update"]), async (req, res) => {
+router.put('/update', auth.checkRoles(["user_update"]), async (req, res) => {
     let body = req.body
     try {
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
@@ -165,10 +170,10 @@ router.put('/update',auth.checkRoles(["user_update"]), async (req, res) => {
 
         if (Array.isArray(body.roles) && body.roles.length > 0) {
             const roleDocs = await Roles.find({
-                 _id: { $in: body.roles }
+                _id: { $in: body.roles }
             });
 
-            if (roleDocs.length !== body.roles.length) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST,"Invalid Role","One or more roles not found")
+            if (roleDocs.length !== body.roles.length) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Invalid Role", "One or more roles not found")
 
             await UserRoles.deleteMany({ user_id: body._id });
 
@@ -181,10 +186,10 @@ router.put('/update',auth.checkRoles(["user_update"]), async (req, res) => {
         }
 
         let user = await Users.updateOne({ _id: body._id }, updates)
-        let updatedUser = await Users.findOne({_id:body._id})
-        const plainUser = updatedUser.toObject()     
+        let updatedUser = await Users.findOne({ _id: body._id })
+        const plainUser = updatedUser.toObject()
         const { password, ...safeUser } = plainUser
-        
+
         Auditlogs.info(req.user?.email, "Users", "Update", safeUser)
         logger.info(req.user?.email, "Users", "Update", JSON.stringify(safeUser))
         res.json(Response.successResponse(user));
@@ -195,12 +200,12 @@ router.put('/update',auth.checkRoles(["user_update"]), async (req, res) => {
     }
 })
 
-router.delete('/delete',auth.checkRoles(["user_delete"]), async (req, res) => {
+router.delete('/delete', auth.checkRoles(["user_delete"]), async (req, res) => {
     let body = req.body
     try {
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
         let user = await Users.deleteOne({ _id: body._id })
-        await UserRoles.deleteMany({user_id:body._id})
+        await UserRoles.deleteMany({ user_id: body._id })
 
         res.json(Response.successResponse(user))
 

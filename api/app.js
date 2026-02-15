@@ -6,7 +6,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
-
 const app = express();
 
 // view engine setup
@@ -20,7 +19,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api', require('./routes/index'));
-
+app.get("/",(req,res) => {
+    res.redirect("/api/admin")
+})
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

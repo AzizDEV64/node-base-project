@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – Admin Panel</title>
+  <link rel="stylesheet" href="/stylesheets/style2.css" />
+</head>
+
+<body>
+
+  <div class="login-page">
+    <!-- Animated background shapes -->
+    <div class="login-bg-shapes">
+      <span></span><span></span><span></span>
+    </div>
+
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-icon">⬡</div>
+        <h1>Admin Panel</h1>
+      </div>
+      <p class="login-subtitle">Sign in to access the dashboard</p>
+      <% if (typeof errorResponse !=="undefined" && errorResponse) { %>
+        <div class="login-error" id="loginError">
+          <%= errorResponse.error.description %>
+        </div>
+        <% } %>
+
+          <form action="/api/users/login" class="login-form" action="" method="POST">
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input class="form-control" type="email" id="loginEmail" name="email" placeholder="admin@demo.com" value="<%= email || '' %>"
+                required  />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input class="form-control" type="password" id="loginPassword" name="password" placeholder="••••••••"
+                required />
+            </div>
+            <button type="submit" class="login-btn">Sign In</button>
+          </form>
+    </div>
+  </div>
+
+</body>
+
+</html>
