@@ -87,34 +87,27 @@
         <div class="dash-grid">
           <div class="dash-card">
             <div class="card-icon purple">👥</div>
-            <div class="card-value">12</div>
-            <div class="card-label">Total Users · 8 active</div>
+            <div class="card-value"><%= countDB[0].usersLength %></div>
+            <div class="card-label">Total Users · <%= countDB[1].activeUsersLength %> active</div>
           </div>
+
+          
           <div class="dash-card">
             <div class="card-icon green">🛡️</div>
-            <div class="card-value">8</div>
-            <div class="card-label">Roles · 6 active</div>
+            <div class="card-value"><%= countDB[0].rolesLength %></div>
+            <div class="card-label">Roles · <%= countDB[1].activeRolesLength %> active</div>
           </div>
           <div class="dash-card">
             <div class="card-icon amber">📂</div>
-            <div class="card-value">10</div>
-            <div class="card-label">Categories · 7 active</div>
-          </div>
-          <div class="dash-card">
-            <div class="card-icon rose">🔑</div>
-            <div class="card-value">8</div>
-            <div class="card-label">Role Privileges</div>
+            <div class="card-value"><%= countDB[0].categoriesLength %></div>
+            <div class="card-label">Categories · <%= countDB[1].activeCategoriesLength %> active</div>
           </div>
           <div class="dash-card">
             <div class="card-icon sky">📋</div>
-            <div class="card-value">15</div>
-            <div class="card-label">Audit Logs · 3 errors</div>
+            <div class="card-value"><%= countDB[0].auditlogsLength %></div>
+            <div class="card-label">Audit Logs</div>
           </div>
-          <div class="dash-card">
-            <div class="card-icon teal">🔗</div>
-            <div class="card-value">8</div>
-            <div class="card-label">User–Role Assignments</div>
-          </div>
+          
         </div>
 
         <% if(["auditlogs_view"].some(r=> userPermissionsName.includes(r))){ %>

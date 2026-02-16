@@ -6,6 +6,7 @@ const UserRoles = require("../db/models/UserRoles")
 const Roles = require("../db/models/Roles")
 const RolePrivileges = require("../db/models/RolePrivileges")
 const AuditLogs = require("../db/models/AuditLogs")
+const countDBModel = require("../lib/countDBModel.js")
 
 router.get("/panel", async (req, res) => {
     let userId;
@@ -27,12 +28,11 @@ router.get("/panel", async (req, res) => {
         permissions.map(permission => userPermissionsName.push(permission.permissions))
 
         let auditlogs;
-        if(userPermissionsName.includes("auditlogs_view")){
-            auditlogs = await AuditLogs.find({},{created_at:0,updated_at:0}).sort({created_at:-1})
+        if (userPermissionsName.includes("auditlogs_view")) {
+            auditlogs = await AuditLogs.find({}, { created_at: 0, updated_at: 0 }).sort({ created_at: -1 })
         }
 
-
-        res.render("admin", { userPermissionsName,auditlogs })
+        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel() })
     } catch (error) {
         res.redirect("/api/admin")
     }
