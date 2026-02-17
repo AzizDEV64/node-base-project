@@ -7,7 +7,12 @@ const Roles = require("../db/models/Roles")
 const RolePrivileges = require("../db/models/RolePrivileges")
 const AuditLogs = require("../db/models/AuditLogs")
 const countDBModel = require("../lib/countDBModel.js")
-
+const Categories = require("../db/models/Categories.js")
+router.get("/", (req, res) => {
+    res.render("login", {
+        email: "",
+    })
+})
 router.get("/panel", async (req, res) => {
     let userId;
     try {
@@ -16,7 +21,6 @@ router.get("/panel", async (req, res) => {
         jwt.verify(req.cookies.jsonwebtoken, config.JWT_KEY, (err, decoded) => {
             userId = decoded.id
         })
-
         const user = await Users.findById(userId, { password: 0 })
         if (!user) return res.redirect("/api/admin")
 
@@ -31,18 +35,25 @@ router.get("/panel", async (req, res) => {
         if (userPermissionsName.includes("auditlogs_view")) {
             auditlogs = await AuditLogs.find({}, { created_at: 0, updated_at: 0 }).sort({ created_at: -1 })
         }
-
-        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel() })
+        let users;
+        if(userPermissionsName.includes("user_view")){
+            users = await Users.find({ _id: { $ne: user._id } },{password:0})
+        }
+        let allroles;
+        if(userPermissionsName.includes("role_view")){
+            allroles = await Roles.find({ role_name: { $ne: "super-admin" } })
+        }
+        let categories;
+        if(userPermissionsName.includes("category_view")){
+            categories = await Categories.find({})
+        }
+        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel(), users, allroles })
     } catch (error) {
         res.redirect("/api/admin")
     }
 
 })
-router.get("/", (req, res) => {
-    res.render("login", {
-        email: "",
-    })
-})
+
 router.get("/logout", (req, res) => {
     res.clearCookie("jsonwebtoken");
     res.redirect("/api/admin")

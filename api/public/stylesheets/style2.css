@@ -323,7 +323,7 @@ body { display: flex; min-height: 100vh; overflow-x: hidden; }
 }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-hover); }
-.btn-sm { padding: 5px 12px; font-size: .8rem; }
+.btn-sm { padding: 5px 12px; font-size: .8rem;  }
 .btn-edit { background: rgba(99,102,241,.15); color: var(--accent-hover); }
 .btn-edit:hover { background: rgba(99,102,241,.3); }
 .btn-delete { background: rgba(239,68,68,.12); color: var(--danger); }
@@ -493,3 +493,102 @@ select.form-control option { background: var(--content-card); color: var(--conte
 
 /* Actions col */
 .actions-cell { display: flex; gap: 6px; align-items: center; }
+
+/* Checkbox labels in modals */
+.checkbox-label {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  background: var(--content-input-bg);
+  border: 1px solid var(--content-input-border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: .85rem;
+  color: var(--content-text-secondary);
+  transition: all var(--transition);
+}
+.checkbox-label:hover {
+  border-color: var(--accent);
+  background: rgba(99,102,241,.08);
+}
+
+/* ===== PERMISSIONS SECTION ===== */
+.permissions-container {
+  background: var(--content-card);
+  border: 1px solid var(--content-border);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+.permissions-description {
+  color: var(--content-text-secondary);
+  margin-bottom: 16px;
+}
+.permissions-grid {
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.permission-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 20px;
+  font-size: .82rem; font-weight: 600;
+  background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(167,139,250,.12));
+  color: #818cf8; border: 1px solid rgba(99,102,241,.2);
+  transition: all var(--transition);
+}
+.permission-badge:hover {
+  background: linear-gradient(135deg, rgba(99,102,241,.22), rgba(167,139,250,.22));
+  transform: translateY(-1px);
+}
+
+/* ===== CSS-ONLY PAGINATION (Dashboard Audit Logs) ===== */
+
+/* Hide radio inputs */
+.pagination-radio {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* By default hide ALL rows */
+.dash-audit-paginated tbody tr {
+  display: none;
+}
+
+/* Page 1 (default/checked): show rows 1–50 */
+#dash-audit-page-1:checked ~ .dash-audit-paginated tbody tr:nth-child(n+1):nth-child(-n+50) {
+  display: table-row;
+}
+
+/* Page 2: show rows 51–100 */
+#dash-audit-page-2:checked ~ .dash-audit-paginated tbody tr:nth-child(n+51):nth-child(-n+100) {
+  display: table-row;
+}
+
+/* Page 3: show rows 101–150 */
+#dash-audit-page-3:checked ~ .dash-audit-paginated tbody tr:nth-child(n+101):nth-child(-n+150) {
+  display: table-row;
+}
+
+/* Page 4: show rows 151–200 */
+#dash-audit-page-4:checked ~ .dash-audit-paginated tbody tr:nth-child(n+151):nth-child(-n+200) {
+  display: table-row;
+}
+
+/* Page 5: show rows 201–250 */
+#dash-audit-page-5:checked ~ .dash-audit-paginated tbody tr:nth-child(n+201):nth-child(-n+250) {
+  display: table-row;
+}
+
+/* Active state for pagination labels */
+.dash-audit-pagination .page-btn {
+  cursor: pointer;
+  user-select: none;
+}
+
+#dash-audit-page-1:checked ~ .dash-audit-pagination .page-btn:nth-child(1),
+#dash-audit-page-2:checked ~ .dash-audit-pagination .page-btn:nth-child(2),
+#dash-audit-page-3:checked ~ .dash-audit-pagination .page-btn:nth-child(3),
+#dash-audit-page-4:checked ~ .dash-audit-pagination .page-btn:nth-child(4),
+#dash-audit-page-5:checked ~ .dash-audit-pagination .page-btn:nth-child(5) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}

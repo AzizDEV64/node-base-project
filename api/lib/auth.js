@@ -8,11 +8,18 @@ const privs = require("../config/role_privileges.js")
 const { HTTP_CODES } = require("../config/enum.js")
 const Response = require("./Response.js")
 const CustomError = require("./Error.js")
-module.exports = function () {
 
+module.exports = function () {
+    const cookieExtractor = function (req) {
+        let token = null
+        if (req && req.cookies) {
+            token = req.cookies.jsonwebtoken
+        }
+        return token
+    }
     let strategy = new Strategy({
         secretOrKey: config.JWT_KEY,
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
+        jwtFromRequest: cookieExtractor
     }, async (payload, done) => {
         try {
             let user = await Users.findById(payload.id)
@@ -57,7 +64,7 @@ module.exports = function () {
                     return next();
                 }
 
-                return res.status(HTTP_CODES.UNAUTHORIZED).json(Response.errorResponse(new CustomError(HTTP_CODES.UNAUTHORIZED,"Need permissions","Need Permission")))
+                return res.status(HTTP_CODES.UNAUTHORIZED).json(Response.errorResponse(new CustomError(HTTP_CODES.UNAUTHORIZED, "Need permissions", "Need Permission")))
             }
         }
 

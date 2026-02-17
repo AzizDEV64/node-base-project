@@ -85,7 +85,6 @@ router.post('/login', limiter, async (req, res) => {
         })
         return res.redirect("/api/admin/panel");
     } catch (error) {
-        console.log(email,password)
         logger.error(req.user?.email, "Users", "Login", error.message)
         let errorResponse = Response.errorResponse(error)
         res.status(errorResponse.code).render("login",{errorResponse,email});
@@ -115,13 +114,14 @@ router.get('/', auth.checkRoles(["user_view"]), async (req, res) => {
 
 router.post('/add', auth.checkRoles(["user_add"]), async (req, res) => {
     let body = req.body
+    console.log(body)
     try {
         if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
         if (!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password field must be filled!")
         if (body.password.length < 8) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password length must be greater than 8!")
         if (!is.email(body.email)) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be an email!")
-        if (!body.roles || !Array.isArray(body.roles) || body.roles.length == 0) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "roles field must be an array!")
-
+        if (!body.roles) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "roles field must be filled!")
+        body.roles = [body.roles]
         let roles = await Roles.find({ _id: { $in: body.roles } })
         if (roles.length == 0) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "roles field must be an array!")
 
@@ -149,7 +149,7 @@ router.post('/add', auth.checkRoles(["user_add"]), async (req, res) => {
         Auditlogs.info(req.user?.email, "Users", "Add", safeUser)
         logger.info(req.user?.email, "Users", "Add", JSON.stringify(safeUser))
 
-        res.json(Response.successResponse(user));
+        res.status(Enum.HTTP_CODES.OK).json({success:true})
     } catch (error) {
         logger.error(req.user?.email, "Users", "Add", error.message)
         let errorResponse = Response.errorResponse(error)
@@ -203,11 +203,12 @@ router.put('/update', auth.checkRoles(["user_update"]), async (req, res) => {
 router.delete('/delete', auth.checkRoles(["user_delete"]), async (req, res) => {
     let body = req.body
     try {
+        console.log(body)
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
         let user = await Users.deleteOne({ _id: body._id })
         await UserRoles.deleteMany({ user_id: body._id })
 
-        res.json(Response.successResponse(user))
+        res.status(Enum.HTTP_CODES.OK).json({success:true})
 
         Auditlogs.info(req.user?.email, "Users", "Delete", { _id: body._id })
         logger.info(req.user?.email, "Users", "Delete", JSON.stringify({ _id: body._id }))
