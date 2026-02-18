@@ -374,7 +374,7 @@
                 <td><%=category.created_by.email%></td>
                 <td class="actions-cell">
                   <% if(["category_update"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-edit" onclick="openModal('editCategoryModal'); getValueOfEditInput('<%= JSON.stringify(category) %>');">✏️ Edit</button>
+                        <button class="btn btn-sm btn-edit" onclick="openModal('editCategoryModal'); getValueOfEditCategoryInput('<%= JSON.stringify(category) %>');">✏️ Edit</button>
                       <% } %>
                       <% if(["category_delete"].some(r=>userPermissionsName.includes(r))){ %>
                         <button class="btn btn-sm btn-delete" onclick="deleteCategory('<%= category._id %>')">🗑️ Del</button>
@@ -771,11 +771,11 @@
         <form id="addCategoryForm">
           <div class="form-group">
             <label>Category Name *</label>
-            <input class="form-control" type="text" name="name" placeholder="e.g. Electronics" />
+            <input class="form-control" type="text" name="category_name" placeholder="e.g. Electronics" />
           </div>
           <div class="modal-footer">
             <button class="btn btn-outline" onclick="closeModal('addCategoryModal')">Cancel</button>
-            <button class="btn btn-primary">Add Category</button>
+            <button type="submit" class="btn btn-primary">Add Category</button>
           </div>
         </form>
       </div>
@@ -963,17 +963,18 @@
           </div>
           <div class="form-group">
             <label>Status</label>
-            <select class="form-control" name="is_active">
+            <select id="edit_is_active"  class="form-control" name="is_active">
               <option value="true">Active</option>
               <option value="false">Inactive</option>
             </select>
           </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('editCategoryModal')">Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+          </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('editCategoryModal')">Cancel</button>
-        <button class="btn btn-primary">Save Changes</button>
-      </div>
+      
     </div>
   </div>
 

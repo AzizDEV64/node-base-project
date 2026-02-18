@@ -1,4 +1,3 @@
-
 //DELETE USER
 const deleteUser = async (userId) => {
     if (!confirm("Silmek istediğine emin misin?")) return
@@ -113,17 +112,42 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
         alert("Hata oluştu: " + error.message)
     }
 })
+
+
+
+//DELETE CATEGORY
+const deleteCategory = async (categoryId) => {
+    if (!confirm("Silmek istediğine emin misin?")) return
+    try {
+        const response = await fetch("http://localhost:3000/api/categories/delete", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ _id: categoryId })
+        })
+
+        if (!response.ok) {
+            throw new Error("Not deleted")
+        }
+        alert("Deleted")
+        location.reload()
+    } catch (error) {
+        alert("Hata oluştu: " + error)
+    }
+}
 //ADD CATEGORY
-document.getElementById("addCategoryModal").addEventListener("submit", async function (e) {
+document.getElementById("addCategoryForm").addEventListener("submit", async function (e) {
 
     e.preventDefault()
-
+    console.log(this.category_name)
     try {
         const formObj = {
-            name: this.name.value
+            name: this.category_name.value
         }
 
-        const response = await fetch("/api/users/add", {
+        const response = await fetch("/api/categories/add", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -137,7 +161,56 @@ document.getElementById("addCategoryModal").addEventListener("submit", async fun
             throw new Error(data.message)
         }
 
-        alert("User Added")
+        alert("Categories Added")
+        location.reload()
+
+    } catch (error) {
+        alert("Hata oluştu: " + error.message)
+    }
+})
+//EDIT CATEGORY
+let editCategoryID;
+function getValueOfEditCategoryInput(category){
+    const editInput = document.querySelectorAll("#editCategoryForm input")
+    const editCategory = JSON.parse(category)
+    editCategoryID = editCategory._id
+    editInput[0].value = editCategory.name
+    document.querySelector("#editCategoryForm #edit_is_active").value = editCategory.is_active ? "true" : "false"
+}
+
+document.getElementById("editCategoryForm").addEventListener("submit", async function (e) {
+
+    e.preventDefault()
+
+    try {
+        let is_active;
+        if(this.is_active.value == "false")is_active = false
+        else is_active = true
+        
+        
+
+        const formObj = {
+            _id:editCategoryID,
+            name: this.name.value ? this.name.value : null,
+            is_active,
+        }
+        
+
+        const response = await fetch("/api/categories/update", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formObj)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message)
+        }
+
+        alert("Category Updated")
         location.reload()
 
     } catch (error) {
