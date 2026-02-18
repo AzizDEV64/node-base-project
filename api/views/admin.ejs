@@ -230,18 +230,14 @@
                           ? "Active" : "Inactive" %> </span></td>
                     <td class="actions-cell">
                       <% if(["user_update"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-edit"
-                          onclick="openModal('editUserModal'); getValueOfEditInput('<%= JSON.stringify(user) %>');">✏️
-                          Edit</button>
-                        <% } %>
-                          <% if(["user_delete"].some(r=>userPermissionsName.includes(r))){ %>
-                            <button class="btn btn-sm btn-delete" onclick="deleteUser('<%= user._id %>')">🗑️
-                              Del</button>
-                            <% } %>
-                              <% if (!["user_update"].some(r=>userPermissionsName.includes(r)) &&
-                                !["user_delete"].some(r=>userPermissionsName.includes(r))){%>
+                        <button class="btn btn-sm btn-edit" onclick="openModal('editUserModal'); getValueOfEditUserInput('<%= JSON.stringify(user) %>');">✏️ Edit</button>
+                      <% } %>
+                      <% if(["user_delete"].some(r=>userPermissionsName.includes(r))){ %>
+                        <button class="btn btn-sm btn-delete" onclick="deleteUser('<%= user._id %>')">🗑️ Del</button>
+                      <% } %>
+                      <% if (!["user_update"].some(r=>userPermissionsName.includes(r)) && !["user_delete"].some(r=>userPermissionsName.includes(r))){%>
                                 <button class="btn btn-sm ">🚫</button>
-                                <% } %>
+                      <% } %>
                     </td>
                   </tr>
                   <%}%>
@@ -353,7 +349,9 @@
           <span class="section-title">Categories</span>
           <div class="toolbar">
             <input class="search-box" type="text" placeholder="Search categories…" />
+             <% if(["category_add"].some(r=>userPermissionsName.includes(r))){ %>
             <button class="btn btn-primary" onclick="openModal('addCategoryModal')">＋ Add Category</button>
+            <%}%>
           </div>
         </div>
 
@@ -368,76 +366,26 @@
               </tr>
             </thead>
             <tbody>
+              <% if(categories && categories.length > 0){%>
+                <% for(let category of categories) {%>
               <tr>
-                <td>Electronics</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit" onclick="openModal('editCategoryModal')">✏️
-                    Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
+                <td><%=category.name%></td>
+                <td><span class="badge <%= category.is_active ? " badge-active" : "badge-inactive" %>"><%=category.is_active ? "Active" : "Inactive" %> </span></td>
+                <td><%=category.created_by.email%></td>
+                <td class="actions-cell">
+                  <% if(["category_update"].some(r=>userPermissionsName.includes(r))){ %>
+                        <button class="btn btn-sm btn-edit" onclick="openModal('editCategoryModal'); getValueOfEditInput('<%= JSON.stringify(category) %>');">✏️ Edit</button>
+                      <% } %>
+                      <% if(["category_delete"].some(r=>userPermissionsName.includes(r))){ %>
+                        <button class="btn btn-sm btn-delete" onclick="deleteCategory('<%= category._id %>')">🗑️ Del</button>
+                      <% } %>
+                      <% if (!["category_update"].some(r=>userPermissionsName.includes(r)) && !["category_delete"].some(r=>userPermissionsName.includes(r))){%>
+                                <button class="btn btn-sm ">🚫</button>
+                    <% } %>
+                </td>
               </tr>
-              <tr>
-                <td>Clothing</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>editor@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Books</td>
-                <td><span class="badge badge-inactive">Inactive</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Home &amp; Garden</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Sports</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>editor@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Automotive</td>
-                <td><span class="badge badge-inactive">Inactive</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Health &amp; Beauty</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>manager@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Toys</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>editor@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Food &amp; Beverage</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Office Supplies</td>
-                <td><span class="badge badge-inactive">Inactive</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
+                <%}%>
+              <%}%>
             </tbody>
           </table>
           <div class="pagination">
@@ -825,12 +773,13 @@
             <label>Category Name *</label>
             <input class="form-control" type="text" name="name" placeholder="e.g. Electronics" />
           </div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('addCategoryModal')">Cancel</button>
+            <button class="btn btn-primary">Add Category</button>
+          </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('addCategoryModal')">Cancel</button>
-        <button class="btn btn-primary">Add Category</button>
-      </div>
+      
     </div>
   </div>
 

@@ -27,7 +27,6 @@ document.getElementById("addUserForm").addEventListener("submit", async function
     e.preventDefault()
 
     try {
-        console.log(this.roles.value)
         const formObj = {
             email: this.email.value,
             password: this.password.value,
@@ -55,12 +54,12 @@ document.getElementById("addUserForm").addEventListener("submit", async function
         location.reload()
 
     } catch (error) {
-        console.log(error)
         alert("Hata oluştu: " + error.message)
     }
 })
+//EDIT USER
 let editUserID;
-function getValueOfEditInput(user) {
+function getValueOfEditUserInput(user) {
     const editInput = document.querySelectorAll("#editUserForm input")
     const editUser = JSON.parse(user)
     editUserID = editUser._id
@@ -71,9 +70,7 @@ function getValueOfEditInput(user) {
     document.getElementById("edit_is_active").value = editUser.is_active ? "true" : "false"
     
 }
-//EDIT USER
 document.getElementById("editUserForm").addEventListener("submit", async function (e) {
-    console.log(editUserID)
 
     e.preventDefault()
 
@@ -81,6 +78,8 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
         let is_active;
         if(this.is_active.value == "false")is_active = false
         else is_active = true
+        
+        
 
         const formObj = {
             _id:editUserID,
@@ -88,7 +87,8 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
             first_name: this.first_name.value ? this.first_name.value : null,
             last_name: this.last_name.value ? this.last_name.value : null,
             phone_number: this.phone_number.value ? this.phone_number.value : null,
-            is_active
+            is_active,
+            roles:this.roles.value ? [this.roles.value] : null
         }
         
 
@@ -110,7 +110,37 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
         location.reload()
 
     } catch (error) {
-        console.log(error)
+        alert("Hata oluştu: " + error.message)
+    }
+})
+//ADD CATEGORY
+document.getElementById("addCategoryModal").addEventListener("submit", async function (e) {
+
+    e.preventDefault()
+
+    try {
+        const formObj = {
+            name: this.name.value
+        }
+
+        const response = await fetch("/api/users/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formObj)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message)
+        }
+
+        alert("User Added")
+        location.reload()
+
+    } catch (error) {
         alert("Hata oluştu: " + error.message)
     }
 })

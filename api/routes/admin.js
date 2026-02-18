@@ -45,9 +45,9 @@ router.get("/panel", async (req, res) => {
         }
         let categories;
         if(userPermissionsName.includes("category_view")){
-            categories = await Categories.find({})
+            categories = await Categories.find({}).populate("created_by")
         }
-        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel(), users, allroles })
+        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel(), users, allroles, categories })
     } catch (error) {
         res.redirect("/api/admin")
     }
