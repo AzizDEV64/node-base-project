@@ -508,6 +508,7 @@
           <table>
             <thead>
               <tr>
+                <th>No</th>
                 <th>Level</th>
                 <th>Email</th>
                 <th>Location</th>
@@ -516,111 +517,18 @@
               </tr>
             </thead>
             <tbody>
+              <%if(auditlogs && auditlogs.length >0){ %>
+                <%for(let i=0;i<auditlogs.length;i++){%>
               <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>admin@demo.com</td>
-                <td>/api/users</td>
-                <td>GET</td>
-                <td>Fetched user list</td>
+                <td><%=i+1%></td>
+                <td><span class="log-level log-info"><%=auditlogs[i].level%></span></td>
+                <td><%=auditlogs[i].email%></td>
+                <td><%=auditlogs[i].location%></td>
+                <td><%=auditlogs[i].proc_type%></td>
+                <td style="max-width: 250px; word-wrap: break-word; white-space: normal;"><%=JSON.stringify(auditlogs[i].log)%></td>
               </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>admin@demo.com</td>
-                <td>/api/users/1</td>
-                <td>PUT</td>
-                <td>Updated user profile</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-warn">warn</span></td>
-                <td>editor@demo.com</td>
-                <td>/api/categories</td>
-                <td>POST</td>
-                <td>Attempted duplicate category creation</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-error">error</span></td>
-                <td>viewer@demo.com</td>
-                <td>/api/roles</td>
-                <td>DELETE</td>
-                <td>Unauthorized delete attempt</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>manager@demo.com</td>
-                <td>/api/login</td>
-                <td>POST</td>
-                <td>Successful login</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-debug">debug</span></td>
-                <td>dev@demo.com</td>
-                <td>/api/roles/6</td>
-                <td>GET</td>
-                <td>Debug: role cache miss</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-warn">warn</span></td>
-                <td>support@demo.com</td>
-                <td>/api/users/5</td>
-                <td>PUT</td>
-                <td>Rate limit approaching</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>admin@demo.com</td>
-                <td>/api/categories/1</td>
-                <td>PUT</td>
-                <td>Category updated</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-error">error</span></td>
-                <td>test@demo.com</td>
-                <td>/api/privileges</td>
-                <td>POST</td>
-                <td>Validation failed: missing role_id</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>admin@demo.com</td>
-                <td>/api/logout</td>
-                <td>POST</td>
-                <td>User logged out</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-debug">debug</span></td>
-                <td>dev@demo.com</td>
-                <td>/api/health</td>
-                <td>GET</td>
-                <td>Health check OK</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-warn">warn</span></td>
-                <td>hr@demo.com</td>
-                <td>/api/users</td>
-                <td>POST</td>
-                <td>Weak password detected</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>finance@demo.com</td>
-                <td>/api/reports</td>
-                <td>GET</td>
-                <td>Report generated</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-error">error</span></td>
-                <td>ops@demo.com</td>
-                <td>/api/deploy</td>
-                <td>POST</td>
-                <td>Deployment failed: timeout</td>
-              </tr>
-              <tr>
-                <td><span class="log-level log-info">info</span></td>
-                <td>legal@demo.com</td>
-                <td>/api/login</td>
-                <td>POST</td>
-                <td>Login attempt – account inactive</td>
-              </tr>
+              <%}%>
+              <%}%>
             </tbody>
           </table>
           <div class="pagination">
