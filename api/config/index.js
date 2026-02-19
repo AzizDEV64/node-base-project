@@ -3,5 +3,7 @@ module.exports = {
     "CONNECTION_STRING": process.env.CONNECTION_STRING || "mongodb://localhost:27017/node_base_project",
     "PORT": process.env.PORT || 3000,
     "JWT_KEY":process.env.JWT_KEY,
-    "UPLOAD_FILE_PATH":process.env.UPLOAD_FILE_PATH
+    "UPLOAD_FILE_PATH":process.env.UPLOAD_FILE_PATH,
+    "SUPER_ADMIN_ID":process.env.SUPER_ADMIN_ID,
+    "SUPER_ADMIN_ROLE_NAME":process.env.SUPER_ADMIN_ROLE_NAME
 }

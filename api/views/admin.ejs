@@ -45,22 +45,17 @@
                     <span class="nav-icon">📂</span> Categories
                   </a>
                   <% } %>
-                    <% if(["role_view", "role_update" ,"role_add","role_delete"].some(r=>
-                      userPermissionsName.includes(r))){ %>
-                      <a class="nav-item" href="#rolePrivileges" onclick="navigate('rolePrivileges')">
-                        <span class="nav-icon">🔑</span> Role Privileges
+
+                    <% if(["auditlogs_view"].some(r=> userPermissionsName.includes(r))){ %>
+                      <div class="nav-label">System</div>
+                      <a class="nav-item" href="#auditLogs" onclick="navigate('auditLogs')">
+                        <span class="nav-icon">📋</span> Audit Logs
                       </a>
                       <% } %>
-                        <% if(["auditlogs_view"].some(r=> userPermissionsName.includes(r))){ %>
-                          <div class="nav-label">System</div>
-                          <a class="nav-item" href="#auditLogs" onclick="navigate('auditLogs')">
-                            <span class="nav-icon">📋</span> Audit Logs
-                          </a>
-                          <% } %>
-                            <div class="nav-label">Account</div>
-                            <a class="nav-item" href="#myPermissions" onclick="navigate('myPermissions')">
-                              <span class="nav-icon">🔐</span> My Permissions
-                            </a>
+                        <div class="nav-label">Account</div>
+                        <a class="nav-item" href="#myPermissions" onclick="navigate('myPermissions')">
+                          <span class="nav-icon">🔐</span> My Permissions
+                        </a>
       </nav>
       <div class="sidebar-footer">
         <a class="logout-btn" href="/api/admin/logout">
@@ -230,14 +225,18 @@
                           ? "Active" : "Inactive" %> </span></td>
                     <td class="actions-cell">
                       <% if(["user_update"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-edit" onclick="openModal('editUserModal'); getValueOfEditUserInput('<%= JSON.stringify(user) %>');">✏️ Edit</button>
-                      <% } %>
-                      <% if(["user_delete"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-delete" onclick="deleteUser('<%= user._id %>')">🗑️ Del</button>
-                      <% } %>
-                      <% if (!["user_update"].some(r=>userPermissionsName.includes(r)) && !["user_delete"].some(r=>userPermissionsName.includes(r))){%>
+                        <button class="btn btn-sm btn-edit"
+                          onclick="openModal('editUserModal'); getValueOfEditUserInput('<%= JSON.stringify(user) %>');">✏️
+                          Edit</button>
+                        <% } %>
+                          <% if(["user_delete"].some(r=>userPermissionsName.includes(r))){ %>
+                            <button class="btn btn-sm btn-delete" onclick="deleteUser('<%= user._id %>')">🗑️
+                              Del</button>
+                            <% } %>
+                              <% if (!["user_update"].some(r=>userPermissionsName.includes(r)) &&
+                                !["user_delete"].some(r=>userPermissionsName.includes(r))){%>
                                 <button class="btn btn-sm ">🚫</button>
-                      <% } %>
+                                <% } %>
                     </td>
                   </tr>
                   <%}%>
@@ -257,7 +256,7 @@
       <main class="content section" id="section-roles" style="display:none;">
 
         <div class="section-header">
-          <span class="section-title">Roles</span>
+          <span class="section-title">Roles & Privileges</span>
           <div class="toolbar">
             <input class="search-box" type="text" placeholder="Search roles…" />
             <button class="btn btn-primary" onclick="openModal('addRoleModal')">＋ Add Role</button>
@@ -269,68 +268,41 @@
             <thead>
               <tr>
                 <th>Role Name</th>
+                <th>Permissions</th>
                 <th>Status</th>
                 <th>Created By</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Super Admin</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit" onclick="openModal('editRoleModal')">✏️
-                    Edit</button><button class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Editor</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Viewer</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Manager</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Support Agent</td>
-                <td><span class="badge badge-inactive">Inactive</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Developer</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>manager@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>QA Tester</td>
-                <td><span class="badge badge-active">Active</span></td>
-                <td>manager@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>HR Staff</td>
-                <td><span class="badge badge-inactive">Inactive</span></td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
+              <%if(roleData && roleData.length> 0){ %>
+                <% for(let role of roleData){ %>
+                  <tr>
+                    <td>
+                      <%=role.role_name%>
+                    </td>
+                    <td>
+                      <div class="permissions-grid-inline">
+                        <%for(let rolepriv of role.role_priv){%>
+                          <span class="permission-badge">
+                            <%=rolepriv.permissions%>
+                          </span>
+                          <%}%>
+                      </div>
+                    </td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>
+                      <%= role.created_by || "-" %>
+                    </td>
+
+                    <td class="actions-cell">
+                      <button class="btn btn-sm btn-edit" onclick="openModal('editRoleModal')">✏️ Edit</button>
+                      <button class="btn btn-sm btn-delete">🗑️ Del</button>
+                    </td>
+                  </tr>
+                  <%}%>
+                    <%}%>
+
             </tbody>
           </table>
           <div class="pagination">
@@ -349,9 +321,9 @@
           <span class="section-title">Categories</span>
           <div class="toolbar">
             <input class="search-box" type="text" placeholder="Search categories…" />
-             <% if(["category_add"].some(r=>userPermissionsName.includes(r))){ %>
-            <button class="btn btn-primary" onclick="openModal('addCategoryModal')">＋ Add Category</button>
-            <%}%>
+            <% if(["category_add"].some(r=>userPermissionsName.includes(r))){ %>
+              <button class="btn btn-primary" onclick="openModal('addCategoryModal')">＋ Add Category</button>
+              <%}%>
           </div>
         </div>
 
@@ -366,26 +338,36 @@
               </tr>
             </thead>
             <tbody>
-              <% if(categories && categories.length > 0){%>
+              <% if(categories && categories.length> 0){%>
                 <% for(let category of categories) {%>
-              <tr>
-                <td><%=category.name%></td>
-                <td><span class="badge <%= category.is_active ? " badge-active" : "badge-inactive" %>"><%=category.is_active ? "Active" : "Inactive" %> </span></td>
-                <td><%=category.created_by.email%></td>
-                <td class="actions-cell">
-                  <% if(["category_update"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-edit" onclick="openModal('editCategoryModal'); getValueOfEditCategoryInput('<%= JSON.stringify(category) %>');">✏️ Edit</button>
-                      <% } %>
-                      <% if(["category_delete"].some(r=>userPermissionsName.includes(r))){ %>
-                        <button class="btn btn-sm btn-delete" onclick="deleteCategory('<%= category._id %>')">🗑️ Del</button>
-                      <% } %>
-                      <% if (!["category_update"].some(r=>userPermissionsName.includes(r)) && !["category_delete"].some(r=>userPermissionsName.includes(r))){%>
+                  <tr>
+                    <td>
+                      <%=category.name%>
+                    </td>
+                    <td><span class="badge <%= category.is_active ? " badge-active" : "badge-inactive" %>">
+                        <%=category.is_active ? "Active" : "Inactive" %>
+                      </span></td>
+                    <td>
+                      <%=category.created_by.email%>
+                    </td>
+                    <td class="actions-cell">
+                      <% if(["category_update"].some(r=>userPermissionsName.includes(r))){ %>
+                        <button class="btn btn-sm btn-edit"
+                          onclick="openModal('editCategoryModal'); getValueOfEditCategoryInput('<%= JSON.stringify(category) %>');">✏️
+                          Edit</button>
+                        <% } %>
+                          <% if(["category_delete"].some(r=>userPermissionsName.includes(r))){ %>
+                            <button class="btn btn-sm btn-delete" onclick="deleteCategory('<%= category._id %>')">🗑️
+                              Del</button>
+                            <% } %>
+                              <% if (!["category_update"].some(r=>userPermissionsName.includes(r)) &&
+                                !["category_delete"].some(r=>userPermissionsName.includes(r))){%>
                                 <button class="btn btn-sm ">🚫</button>
-                    <% } %>
-                </td>
-              </tr>
-                <%}%>
-              <%}%>
+                                <% } %>
+                    </td>
+                  </tr>
+                  <%}%>
+                    <%}%>
             </tbody>
           </table>
           <div class="pagination">
@@ -395,102 +377,7 @@
         </div>
       </main>
 
-      <!-- ============================================================= -->
-      <!--  SECTION: Role Privileges                                     -->
-      <!-- ============================================================= -->
-      <main class="content section" id="section-rolePrivileges" style="display:none;">
 
-        <div class="section-header">
-          <span class="section-title">Role Privileges</span>
-          <div class="toolbar">
-            <input class="search-box" type="text" placeholder="Search privileges…" />
-            <button class="btn btn-primary" onclick="openModal('addRolePrivilegeModal')">＋ Add Role Privilege</button>
-          </div>
-        </div>
-
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Role</th>
-                <th>Permissions</th>
-                <th>Created By</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Super Admin</td>
-                <td>users:read,write,delete | roles:read,write,delete | categories:read,write,delete | logs:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Editor</td>
-                <td>users:read | categories:read,write | logs:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Viewer</td>
-                <td>users:read | categories:read | logs:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Manager</td>
-                <td>users:read,write | roles:read | categories:read,write | logs:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Support Agent</td>
-                <td>users:read | categories:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>Developer</td>
-                <td>users:read | categories:read,write,delete | logs:read</td>
-                <td>manager@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>QA Tester</td>
-                <td>users:read | categories:read | logs:read</td>
-                <td>manager@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-              <tr>
-                <td>HR Staff</td>
-                <td>users:read</td>
-                <td>admin@demo.com</td>
-                <td class="actions-cell"><button class="btn btn-sm btn-edit"
-                    onclick="openModal('editRolePrivilegeModal')">✏️ Edit</button><button
-                    class="btn btn-sm btn-delete">🗑️ Del</button></td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="pagination">
-            <span class="pagination-info">Showing 1–8 of 8</span>
-            <div class="pagination-btns"><button class="page-btn active">1</button></div>
-          </div>
-        </div>
-      </main>
 
       <!-- ============================================================= -->
       <!--  SECTION: Audit Logs                                          -->
@@ -517,18 +404,30 @@
               </tr>
             </thead>
             <tbody>
-              <%if(auditlogs && auditlogs.length >0){ %>
+              <%if(auditlogs && auditlogs.length>0){ %>
                 <%for(let i=0;i<auditlogs.length;i++){%>
-              <tr>
-                <td><%=i+1%></td>
-                <td><span class="log-level log-info"><%=auditlogs[i].level%></span></td>
-                <td><%=auditlogs[i].email%></td>
-                <td><%=auditlogs[i].location%></td>
-                <td><%=auditlogs[i].proc_type%></td>
-                <td style="max-width: 250px; word-wrap: break-word; white-space: normal;"><%=JSON.stringify(auditlogs[i].log)%></td>
-              </tr>
-              <%}%>
-              <%}%>
+                  <tr>
+                    <td>
+                      <%=i+1%>
+                    </td>
+                    <td><span class="log-level log-info">
+                        <%=auditlogs[i].level%>
+                      </span></td>
+                    <td>
+                      <%=auditlogs[i].email%>
+                    </td>
+                    <td>
+                      <%=auditlogs[i].location%>
+                    </td>
+                    <td>
+                      <%=auditlogs[i].proc_type%>
+                    </td>
+                    <td style="max-width: 250px; word-wrap: break-word; white-space: normal;">
+                      <%=JSON.stringify(auditlogs[i].log)%>
+                    </td>
+                  </tr>
+                  <%}%>
+                    <%}%>
             </tbody>
           </table>
           <div class="pagination">
@@ -687,56 +586,11 @@
           </div>
         </form>
       </div>
-      
+
     </div>
   </div>
 
-  <!-- Add Role Privilege Modal -->
-  <div class="modal-overlay" id="addRolePrivilegeModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Add Role Privilege</h3>
-        <button class="modal-close" onclick="closeModal('addRolePrivilegeModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="addRolePrivilegeForm">
-          <div class="form-group">
-            <label>Role *</label>
-            <select class="form-control" name="role_id">
-              <option value="">Select a role...</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="editor">Editor</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Permission *</label>
-            <select class="form-control" name="permission">
-              <option value="">Select a permission...</option>
-              <option value="user_view">User View</option>
-              <option value="user_add">User Add</option>
-              <option value="user_update">User Update</option>
-              <option value="user_delete">User Delete</option>
-              <option value="role_view">Role View</option>
-              <option value="role_add">Role Add</option>
-              <option value="role_update">Role Update</option>
-              <option value="role_delete">Role Delete</option>
-              <option value="category_view">Category View</option>
-              <option value="category_add">Category Add</option>
-              <option value="category_update">Category Update</option>
-              <option value="category_delete">Category Delete</option>
-              <option value="category_export">Category Export</option>
-              <option value="auditlogs_view">Auditlogs View</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('addRolePrivilegeModal')">Cancel</button>
-        <button class="btn btn-primary">Add Privilege</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Edit User Modal -->
   <div class="modal-overlay" id="editUserModal">
@@ -749,7 +603,7 @@
         <form id="editUserForm">
           <div class="form-group">
             <label>Email *</label>
-            <input class="form-control" type="email" name="email" placeholder="user@example.com" disabled/>
+            <input class="form-control" type="email" name="email" placeholder="user@example.com" disabled />
           </div>
           <div class="form-group">
             <label>Password</label>
@@ -871,7 +725,7 @@
           </div>
           <div class="form-group">
             <label>Status</label>
-            <select id="edit_is_active"  class="form-control" name="is_active">
+            <select id="edit_is_active" class="form-control" name="is_active">
               <option value="true">Active</option>
               <option value="false">Inactive</option>
             </select>
@@ -882,63 +736,18 @@
           </div>
         </form>
       </div>
-      
+
     </div>
   </div>
 
-  <!-- Edit Role Privilege Modal -->
-  <div class="modal-overlay" id="editRolePrivilegeModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Edit Role Privilege</h3>
-        <button class="modal-close" onclick="closeModal('editRolePrivilegeModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="editRolePrivilegeForm">
-          <div class="form-group">
-            <label>Role *</label>
-            <select class="form-control" name="role_id">
-              <option value="">Select a role...</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
-              <option value="editor">Editor</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Permission *</label>
-            <select class="form-control" name="permission">
-              <option value="">Select a permission...</option>
-              <option value="user_view">User View</option>
-              <option value="user_add">User Add</option>
-              <option value="user_update">User Update</option>
-              <option value="user_delete">User Delete</option>
-              <option value="role_view">Role View</option>
-              <option value="role_add">Role Add</option>
-              <option value="role_update">Role Update</option>
-              <option value="role_delete">Role Delete</option>
-              <option value="category_view">Category View</option>
-              <option value="category_add">Category Add</option>
-              <option value="category_update">Category Update</option>
-              <option value="category_delete">Category Delete</option>
-              <option value="category_export">Category Export</option>
-              <option value="auditlogs_view">Auditlogs View</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('editRolePrivilegeModal')">Cancel</button>
-        <button class="btn btn-primary">Save Changes</button>
-      </div>
-    </div>
-  </div>
+
 
   <script>
-    
+
     /* Navigation */
     const titles = {
-      dashboard: 'Dashboard', users: 'Users', roles: 'Roles',
-      categories: 'Categories', rolePrivileges: 'Role Privileges',
+      dashboard: 'Dashboard', users: 'Users', roles: 'Roles & Privileges',
+      categories: 'Categories',
       auditLogs: 'Audit Logs', myPermissions: 'My Permissions'
     };
     function navigate(section) {

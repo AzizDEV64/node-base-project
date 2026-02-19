@@ -24,10 +24,14 @@ router.get("/panel", async (req, res) => {
         const user = await Users.findById(userId, { password: 0 })
         if (!user) return res.redirect("/api/admin")
 
+        const super_admin = await Users.findById(config.SUPER_ADMIN_ID)
+        const super_admin_role = await Roles.find({ role_name: config.SUPER_ADMIN_ROLE_NAME })
+        const super_admin_role_privileges = await RolePrivileges.find({ role_id: super_admin_role[0]._id })
+
         const userRoles = await UserRoles.find({ user_id: user._id })
         const roles = await Roles.find({ _id: { $in: userRoles.map(ur => ur.role_id) } })
         const permissions = await RolePrivileges.find({ role_id: { $in: roles.map(role => role._id) } })
-
+        // console.log(roles)
         let userPermissionsName = []
         permissions.map(permission => userPermissionsName.push(permission.permissions))
 
@@ -36,18 +40,34 @@ router.get("/panel", async (req, res) => {
             auditlogs = await AuditLogs.find({}, { created_at: 0, updated_at: 0 }).sort({ created_at: -1 })
         }
         let users;
-        if(userPermissionsName.includes("user_view")){
-            users = await Users.find({ _id: { $ne: user._id } },{password:0})
+        if (userPermissionsName.includes("user_view")) {
+            users = await Users.find({ _id: { $ne: user._id } }, { password: 0 })
         }
         let allroles;
-        if(userPermissionsName.includes("role_view")){
-            allroles = await Roles.find({ role_name: { $ne: "super-admin" } })
+        if (userPermissionsName.includes("role_view")) {
+            allroles = await Roles.find({ role_name: { $ne: "super-admin" } }).populate("created_by")
         }
+        let rolePrivs
+        if (userPermissionsName.includes("role_view")) {
+            rolePrivs = await RolePrivileges.find({ role_id: { $ne: super_admin_role[0]._id } }).populate("role_id")
+        }
+        let roleData = []
+        for (let role of allroles) {
+            let roleDetailed = { role_name: role.role_name, created_by: role.created_by.email, role_priv: [] }
+            for (let rolePriv of rolePrivs) {
+                if (role.role_name == rolePriv.role_id.role_name) {
+                    roleDetailed.role_priv.push(rolePriv)
+                }
+            }
+            roleData.push(roleDetailed)
+        }
+
+
         let categories;
-        if(userPermissionsName.includes("category_view")){
+        if (userPermissionsName.includes("category_view")) {
             categories = await Categories.find({}).populate("created_by")
         }
-        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel(), users, allroles, categories })
+        res.render("admin", { userPermissionsName, auditlogs, countDB: await countDBModel(), users, allroles, categories, roleData })
     } catch (error) {
         res.redirect("/api/admin")
     }
