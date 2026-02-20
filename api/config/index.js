@@ -4,6 +4,10 @@ module.exports = {
     "PORT": process.env.PORT || 3000,
     "JWT_KEY":process.env.JWT_KEY,
     "UPLOAD_FILE_PATH":process.env.UPLOAD_FILE_PATH,
-    "SUPER_ADMIN_ID":process.env.SUPER_ADMIN_ID,
-    "SUPER_ADMIN_ROLE_NAME":process.env.SUPER_ADMIN_ROLE_NAME
+    "SUPER_ADMIN_ROLE_NAME":process.env.SUPER_ADMIN_ROLE_NAME,
+    "SUPER_ADMIN_EMAIL":process.env.SUPER_ADMIN_EMAIL,
+    "SUPER_ADMIN_NAME":process.env.SUPER_ADMIN_NAME,
+    "SUPER_ADMIN_SURNAME":process.env.SUPER_ADMIN_SURNAME,
+    "SUPER_ADMIN_PASSWORD":process.env.SUPER_ADMIN_PASSWORD,
+    "SUPER_ADMIN_PHONE":process.env.SUPER_ADMIN_PHONE,
 }

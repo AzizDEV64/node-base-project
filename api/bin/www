@@ -4,17 +4,98 @@
  * Module dependencies.
  */
 
+
 var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
 const Database = require("../db/Database.js")
-const {CONNECTION_STRING,PORT} = require("../config/index.js")
+const { CONNECTION_STRING, PORT } = require("../config/index.js")
+const config = require("../config/index.js")
+const bcrypt = require("bcrypt")
+const Users = require("../db/models/Users.js")
+const Roles = require("../db/models/Roles.js")
+const RolePrivileges = require("../db/models/RolePrivileges.js")
+const UserRoles = require("../db/models/UserRoles.js")
+const defaultRolePrivs = require("../config/role_privileges.js")
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(PORT);
 app.set('port', port);
+
+
+async function createSuperAdminIfNotExists() {
+
+  let admin = await Users.findOne({
+    email: config.SUPER_ADMIN_EMAIL
+  })
+
+  if (!admin) {
+    const passwordHash = bcrypt.hashSync(
+      config.SUPER_ADMIN_PASSWORD,
+      bcrypt.genSaltSync(8)
+    )
+
+    admin = await Users.create({
+      email: config.SUPER_ADMIN_EMAIL,
+      password: passwordHash,
+      is_active: true,
+      first_name: config.SUPER_ADMIN_NAME,
+      last_name: config.SUPER_ADMIN_SURNAME,
+      phone_number: config.SUPER_ADMIN_PHONE,
+    })
+
+    console.log("Admin user created")
+  }
+
+  let adminRole = await Roles.findOne({
+    role_name: config.SUPER_ADMIN_ROLE_NAME
+  })
+
+  if (!adminRole) {
+    adminRole = await Roles.create({
+      role_name: config.SUPER_ADMIN_ROLE_NAME
+    })
+
+    console.log("Admin role created")
+  }
+
+  const userRole = await UserRoles.findOne({
+    user_id: admin._id,
+    role_id: adminRole._id
+  })
+
+  if (!userRole) {
+    await UserRoles.create({
+      user_id: admin._id,
+      role_id: adminRole._id
+    })
+
+    console.log("Admin role linked to user")
+  }
+
+  const existingPrivs = await RolePrivileges.find({
+    role_id: adminRole._id
+  })
+
+  const existingKeys = existingPrivs.map(p => p.permissions)
+
+  const missingPrivs = defaultRolePrivs.privileges
+    .filter(p => !existingKeys.includes(p.key))
+    .map(p => ({
+      role_id: adminRole._id,
+      permissions: p.key
+    }))
+
+  if (missingPrivs.length > 0) {
+    await RolePrivileges.insertMany(missingPrivs)
+    console.log("Missing privileges added")
+  }
+
+  console.log("Super admin check completed")
+}
+
 
 /**
  * Create HTTP server.
@@ -82,12 +163,12 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 
-function onListening() {
+async function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-
-  new Database().connect({CONNECTION_STRING})
+  new Database().connect({ CONNECTION_STRING })
+  await createSuperAdminIfNotExists()
 }

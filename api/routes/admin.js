@@ -8,6 +8,8 @@ const RolePrivileges = require("../db/models/RolePrivileges")
 const AuditLogs = require("../db/models/AuditLogs")
 const countDBModel = require("../lib/countDBModel.js")
 const Categories = require("../db/models/Categories.js")
+
+
 router.get("/", (req, res) => {
     res.render("login", {
         email: "",
@@ -24,14 +26,13 @@ router.get("/panel", async (req, res) => {
         const user = await Users.findById(userId, { password: 0 })
         if (!user) return res.redirect("/api/admin")
 
-        const super_admin = await Users.findById(config.SUPER_ADMIN_ID)
-        const super_admin_role = await Roles.find({ role_name: config.SUPER_ADMIN_ROLE_NAME })
-        const super_admin_role_privileges = await RolePrivileges.find({ role_id: super_admin_role[0]._id })
+        const super_admin = await Users.findOne({email:config.SUPER_ADMIN_EMAIL})
+        const super_admin_role = await Roles.findOne({ role_name: config.SUPER_ADMIN_ROLE_NAME })
+        const super_admin_role_privileges = await RolePrivileges.find({ role_id: super_admin_role._id })
 
         const userRoles = await UserRoles.find({ user_id: user._id })
         const roles = await Roles.find({ _id: { $in: userRoles.map(ur => ur.role_id) } })
         const permissions = await RolePrivileges.find({ role_id: { $in: roles.map(role => role._id) } })
-        // console.log(roles)
         let userPermissionsName = []
         permissions.map(permission => userPermissionsName.push(permission.permissions))
 
@@ -45,11 +46,11 @@ router.get("/panel", async (req, res) => {
         }
         let allroles;
         if (userPermissionsName.includes("role_view")) {
-            allroles = await Roles.find({ role_name: { $ne: "super-admin" } }).populate("created_by")
+            allroles = await Roles.find({ role_name: { $ne: config.SUPER_ADMIN_ROLE_NAME } }).populate("created_by")
         }
         let rolePrivs
         if (userPermissionsName.includes("role_view")) {
-            rolePrivs = await RolePrivileges.find({ role_id: { $ne: super_admin_role[0]._id } }).populate("role_id")
+            rolePrivs = await RolePrivileges.find({ role_id: { $ne: super_admin_role._id } }).populate("role_id")
         }
         let roleData = []
         for (let role of allroles) {
