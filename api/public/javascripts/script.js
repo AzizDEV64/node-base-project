@@ -67,7 +67,7 @@ function getValueOfEditUserInput(user) {
     editInput[3].value = editUser.last_name
     editInput[4].value = editUser.phone_number
     document.getElementById("edit_is_active").value = editUser.is_active ? "true" : "false"
-    
+
 }
 document.getElementById("editUserForm").addEventListener("submit", async function (e) {
 
@@ -75,21 +75,21 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
 
     try {
         let is_active;
-        if(this.is_active.value == "false")is_active = false
+        if (this.is_active.value == "false") is_active = false
         else is_active = true
-        
-        
+
+
 
         const formObj = {
-            _id:editUserID,
+            _id: editUserID,
             password: this.password.value ? this.password.value : null,
             first_name: this.first_name.value ? this.first_name.value : null,
             last_name: this.last_name.value ? this.last_name.value : null,
             phone_number: this.phone_number.value ? this.phone_number.value : null,
             is_active,
-            roles:this.roles.value ? [this.roles.value] : null
+            roles: this.roles.value ? [this.roles.value] : null
         }
-        
+
 
         const response = await fetch("/api/users/update", {
             method: "PUT",
@@ -141,7 +141,6 @@ const deleteCategory = async (categoryId) => {
 document.getElementById("addCategoryForm").addEventListener("submit", async function (e) {
 
     e.preventDefault()
-    console.log(this.category_name)
     try {
         const formObj = {
             name: this.category_name.value
@@ -170,31 +169,30 @@ document.getElementById("addCategoryForm").addEventListener("submit", async func
 })
 //EDIT CATEGORY
 let editCategoryID;
-function getValueOfEditCategoryInput(category){
+function getValueOfEditCategoryInput(category) {
     const editInput = document.querySelectorAll("#editCategoryForm input")
     const editCategory = JSON.parse(category)
     editCategoryID = editCategory._id
     editInput[0].value = editCategory.name
     document.querySelector("#editCategoryForm #edit_is_active").value = editCategory.is_active ? "true" : "false"
 }
-
 document.getElementById("editCategoryForm").addEventListener("submit", async function (e) {
 
     e.preventDefault()
 
     try {
         let is_active;
-        if(this.is_active.value == "false")is_active = false
+        if (this.is_active.value == "false") is_active = false
         else is_active = true
-        
-        
+
+
 
         const formObj = {
-            _id:editCategoryID,
+            _id: editCategoryID,
             name: this.name.value ? this.name.value : null,
             is_active,
         }
-        
+
 
         const response = await fetch("/api/categories/update", {
             method: "PUT",
@@ -211,6 +209,129 @@ document.getElementById("editCategoryForm").addEventListener("submit", async fun
         }
 
         alert("Category Updated")
+        location.reload()
+
+    } catch (error) {
+        alert("Hata oluştu: " + error.message)
+    }
+})
+//DELETE ROLE
+const deleteRole = async (roleId) => {
+    console.log(roleId)
+    if (!confirm("Silmek istediğine emin misin?")) return
+    try {
+        const response = await fetch("/api/roles/delete", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include",
+            body: JSON.stringify({ _id: roleId })
+        })
+
+        if (!response.ok) {
+            throw new Error("Not deleted")
+        }
+        alert("Deleted")
+        location.reload()
+    } catch (error) {
+        alert("Hata oluştu: " + error)
+    }
+}
+//ADD ROLE & PRIVILEGES
+document.getElementById("addRoleForm").addEventListener("submit", async function (e) {
+    e.preventDefault()
+    try {
+        const checkedValues = Array.from(
+            document.querySelectorAll('#addRoleForm label input[type="checkbox"]:checked')
+        ).map(cb => cb.value)
+        if (checkedValues.length == 0) {
+            throw new Error("You should select at least 1 role")
+        }
+        console.log(checkedValues)
+        const formObj = {
+            role_name: this.role_name.value,
+            permissions: checkedValues
+        }
+
+        const response = await fetch("/api/roles/add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formObj)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message)
+        }
+
+        alert("Roles Added")
+        location.reload()
+
+    } catch (error) {
+        alert("Hata oluştu: " + error.message)
+    }
+})
+//EDIT ROLE
+let editRoleID;
+function getValueOfEditRoleInput(role) {
+    let editRole = JSON.parse(role)
+    let edit_role_name = document.getElementById("edit_role_name")
+    editRoleID = editRole._id
+    edit_role_name.value = editRole.role_name
+    document.querySelector("#editRoleForm select").value = editRole.is_active ? "true" : "false"
+    let checkbox = document.querySelectorAll("#editRoleForm label input")
+    checkbox.forEach(cb => cb.checked = false)
+    for (let rolePriv of editRole.role_priv) {
+        for (let i = 0; i < checkbox.length; i++) {
+            if (rolePriv.permissions == checkbox[i].value) {
+                checkbox[i].checked = true
+            }
+        }
+    }
+}
+document.getElementById("editRoleForm").addEventListener("submit", async function (e) {
+
+    e.preventDefault()
+
+    try {
+        let is_active;
+        if (this.is_active.value == "false") is_active = false
+        else is_active = true
+        const checkedValues = Array.from(
+            document.querySelectorAll('#editRoleForm label input[type="checkbox"]:checked')
+        ).map(cb => cb.value)
+        if (checkedValues.length == 0) {
+            throw new Error("You should select at least 1 role")
+        }
+
+
+        const formObj = {
+            _id: editRoleID,
+            role_name: this.role_name.value ? this.role_name.value : null,
+            is_active,
+            permissions:checkedValues
+        }
+
+
+        const response = await fetch("/api/roles/update", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formObj)
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message)
+        }
+
+        alert("Roles Updated")
         location.reload()
 
     } catch (error) {

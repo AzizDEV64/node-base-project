@@ -26,7 +26,7 @@ router.get("/panel", async (req, res) => {
         const user = await Users.findById(userId, { password: 0 })
         if (!user) return res.redirect("/api/admin")
 
-        const super_admin = await Users.findOne({email:config.SUPER_ADMIN_EMAIL})
+        const super_admin = await Users.findOne({ email: config.SUPER_ADMIN_EMAIL })
         const super_admin_role = await Roles.findOne({ role_name: config.SUPER_ADMIN_ROLE_NAME })
         const super_admin_role_privileges = await RolePrivileges.find({ role_id: super_admin_role._id })
 
@@ -53,15 +53,18 @@ router.get("/panel", async (req, res) => {
             rolePrivs = await RolePrivileges.find({ role_id: { $ne: super_admin_role._id } }).populate("role_id")
         }
         let roleData = []
-        for (let role of allroles) {
-            let roleDetailed = { role_name: role.role_name, created_by: role.created_by.email, role_priv: [] }
-            for (let rolePriv of rolePrivs) {
-                if (role.role_name == rolePriv.role_id.role_name) {
-                    roleDetailed.role_priv.push(rolePriv)
+        if (userPermissionsName.includes("role_view")) {
+            for (let role of allroles) {
+                let roleDetailed = { _id: role._id,is_active:role.is_active, role_name: role.role_name, created_by: role.created_by.email, role_priv: [] }
+                for (let rolePriv of rolePrivs) {
+                    if (role.role_name == rolePriv.role_id.role_name) {
+                        roleDetailed.role_priv.push(rolePriv)
+                    }
                 }
+                roleData.push(roleDetailed)
             }
-            roleData.push(roleDetailed)
         }
+
 
 
         let categories;

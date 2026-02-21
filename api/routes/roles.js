@@ -83,7 +83,6 @@ router.put('/update',auth.checkRoles(["role_update"]), async (req, res) => {
         
         let roles = await Roles.updateOne({ _id: body._id }, updates)
         
-        // console.log(roles)
         Auditlogs.info(req.user?.email, "Roles", "Update", {_id: body._id,updates,permissions:body.permissions})
         logger.info(req.user?.email, "Roles", "Update", JSON.stringify({_id: body._id,updates,permissions:body.permissions}))
         res.json(Response.successResponse(roles));
