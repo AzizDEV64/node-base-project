@@ -11,18 +11,23 @@ const Categories = require("../db/models/Categories.js")
 
 
 router.get("/", (req, res) => {
-    res.render("login", {
-        email: "",
-    })
+    if (req.cookies.jsonwebtoken) {
+        try {
+            jwt.verify(req.cookies.jsonwebtoken, config.JWT_KEY)
+            return res.redirect("/api/admin/panel")
+        } catch (err) {
+            // token geçersizse devam
+        }
+    }
+    res.render("login", { email: "" })
 })
 router.get("/panel", async (req, res) => {
     let userId;
     try {
         if (!req.cookies.jsonwebtoken) return res.redirect("/api/admin")
 
-        jwt.verify(req.cookies.jsonwebtoken, config.JWT_KEY, (err, decoded) => {
-            userId = decoded.id
-        })
+        const decoded = jwt.verify(req.cookies.jsonwebtoken, config.JWT_KEY)
+        userId = decoded.id
         const user = await Users.findById(userId, { password: 0 })
         if (!user) return res.redirect("/api/admin")
 
@@ -38,11 +43,16 @@ router.get("/panel", async (req, res) => {
 
         let auditlogs;
         if (userPermissionsName.includes("auditlogs_view")) {
-            auditlogs = await AuditLogs.find({}, { created_at: 0, updated_at: 0 }).sort({ created_at: -1 })
+            auditlogs = await AuditLogs.find({}).sort({ created_at: -1 })
         }
         let users;
         if (userPermissionsName.includes("user_view")) {
-            users = await Users.find({ _id: { $ne: user._id } }, { password: 0 })
+            users = await Users.find({ _id: { $ne: user._id } }, { password: 0 }).lean()
+            let userRoles = await UserRoles.find({}).lean().populate("role_id")
+
+            users.forEach(u => {
+                u.role = userRoles.filter(ur => ur.user_id.toString() === u._id.toString())
+            })
         }
         let allroles;
         if (userPermissionsName.includes("role_view")) {
@@ -57,7 +67,7 @@ router.get("/panel", async (req, res) => {
             for (let role of allroles) {
                 let roleDetailed = { _id: role._id,is_active:role.is_active, role_name: role.role_name, created_by: role.created_by.email, role_priv: [] }
                 for (let rolePriv of rolePrivs) {
-                    if (role.role_name == rolePriv.role_id.role_name) {
+                    if (role.role_name === rolePriv.role_id.role_name) {
                         roleDetailed.role_priv.push(rolePriv)
                     }
                 }

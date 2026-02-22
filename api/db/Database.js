@@ -17,6 +17,7 @@ class Database {
             console.log("DB Connected.")
         } catch (error) {
             console.error(error)
+            process.exit(1)
         }
     }
 }

@@ -198,6 +198,7 @@
             <thead>
               <tr>
                 <th>Email</th>
+                <th>Role</th>
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Phone</th>
@@ -211,6 +212,9 @@
                   <tr>
                     <td>
                       <%= user.email %>
+                    </td>
+                    <td>
+                     <%= user.role && user.role.length > 0 ? user.role[0].role_id?.role_name || "-" : "-" %>
                     </td>
                     <td>
                       <%= user.first_name %>

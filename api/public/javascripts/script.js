@@ -2,7 +2,7 @@
 const deleteUser = async (userId) => {
     if (!confirm("Silmek istediğine emin misin?")) return
     try {
-        const response = await fetch("http://localhost:3000/api/users/delete", {
+        const response = await fetch("/api/users/delete", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -119,7 +119,7 @@ document.getElementById("editUserForm").addEventListener("submit", async functio
 const deleteCategory = async (categoryId) => {
     if (!confirm("Silmek istediğine emin misin?")) return
     try {
-        const response = await fetch("http://localhost:3000/api/categories/delete", {
+        const response = await fetch("/api/categories/delete", {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -177,23 +177,16 @@ function getValueOfEditCategoryInput(category) {
     document.querySelector("#editCategoryForm #edit_is_active").value = editCategory.is_active ? "true" : "false"
 }
 document.getElementById("editCategoryForm").addEventListener("submit", async function (e) {
-
     e.preventDefault()
-
     try {
         let is_active;
         if (this.is_active.value == "false") is_active = false
         else is_active = true
-
-
-
         const formObj = {
             _id: editCategoryID,
             name: this.name.value ? this.name.value : null,
             is_active,
         }
-
-
         const response = await fetch("/api/categories/update", {
             method: "PUT",
             headers: {
@@ -217,7 +210,6 @@ document.getElementById("editCategoryForm").addEventListener("submit", async fun
 })
 //DELETE ROLE
 const deleteRole = async (roleId) => {
-    console.log(roleId)
     if (!confirm("Silmek istediğine emin misin?")) return
     try {
         const response = await fetch("/api/roles/delete", {
@@ -248,7 +240,6 @@ document.getElementById("addRoleForm").addEventListener("submit", async function
         if (checkedValues.length == 0) {
             throw new Error("You should select at least 1 role")
         }
-        console.log(checkedValues)
         const formObj = {
             role_name: this.role_name.value,
             permissions: checkedValues

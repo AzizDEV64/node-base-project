@@ -36,7 +36,7 @@ router.post('/add', auth.checkRoles(["category_add"]), async (req, res) => {
             is_active: true,
             created_by: req.user?.id
         })
-        emitter.getEmitter("notifications").emit("messages", { message: category.name + "is added" })
+        emitter.getEmitter("notifications").emit("messages", { message: category.name + " is added" })
         Auditlogs.info(req.user?.email, "Categories", "Add", category)
         logger.info(req.user?.email, "Categories", "Add", category)
 
@@ -91,7 +91,6 @@ router.delete('/delete', auth.checkRoles(["category_delete"]), async (req, res) 
 router.post('/export', auth.checkRoles(["category_export"]), async (req, res) => {
     try {
         let categories = await Categories.find({}).populate("created_by")
-        console.log(categories[0].created_by)
         let excel = excelExport.toExcel(
             ["NAME", "IS ACTIVE", "CREATED BY", "CREATED AT", "UPDATED AT"],
             ["name", "is_active", "created_by", "created_at", "updated_at"],
@@ -99,10 +98,7 @@ router.post('/export', auth.checkRoles(["category_export"]), async (req, res) =>
         )
         let filePath = __dirname + "/../tmp/categories_sheet" + Date.now()
         fs.writeFileSync(filePath, excel, "UTF-8")
-        res.download(filePath)
-        setTimeout(() => {
-            fs.unlinkSync(filePath)
-        }, 2000)
+        res.download(filePath, () => fs.unlinkSync(filePath))
 
     } catch (error) {
         logger.error(req.user?.email, "Categories", "List", error.message)

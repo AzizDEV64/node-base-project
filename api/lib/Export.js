@@ -6,7 +6,6 @@ class Export {
     }
     toExcel(titles, columns, data = []) {
         let rows = []
-        // console.log(titles,columns,data)
         rows.push(titles)
         for (let i = 0; i < data.length; i++) {
             let item = data[i]

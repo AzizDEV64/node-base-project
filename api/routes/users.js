@@ -30,10 +30,7 @@ const limiter = rateLimit({ //for login brute-force
 router.post('/register', async (req, res) => {
     let body = req.body
     try {
-        let users = await Users.find({})
-        if (users.length != 0) {
-            return res.sendStatus(Enum.HTTP_CODES.NOT_FOUND)
-        }
+        
 
         if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
         if (!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password field must be filled!")
@@ -81,7 +78,9 @@ router.post('/login', limiter, async (req, res) => {
         let token = jwt.sign(payload, config.JWT_KEY, { expiresIn: "1d" })
         res.cookie("jsonwebtoken",token,{
             maxAge:1000 * 60 * 60 * 24,
-            httpOnly:true
+            httpOnly:true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
         })
         return res.redirect("/api/admin/panel");
     } catch (error) {
@@ -114,7 +113,6 @@ router.get('/', auth.checkRoles(["user_view"]), async (req, res) => {
 
 router.post('/add', auth.checkRoles(["user_add"]), async (req, res) => {
     let body = req.body
-    console.log(body)
     try {
         if (!body.email) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "email field must be filled!")
         if (!body.password) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "password field must be filled!")
@@ -162,7 +160,7 @@ router.put('/update', auth.checkRoles(["user_update"]), async (req, res) => {
     try {
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
         let updates = {}
-        if (body.password && body.password.length < 8) updates.password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
+        if (body.password && body.password.length >= 8) updates.password = bcrypt.hashSync(body.password, bcrypt.genSaltSync(8), null);
         if (body.first_name) updates.first_name = body.first_name
         if (body.last_name) updates.last_name = body.last_name
         if (body.phone_number) updates.phone_number = body.phone_number
@@ -203,15 +201,13 @@ router.put('/update', auth.checkRoles(["user_update"]), async (req, res) => {
 router.delete('/delete', auth.checkRoles(["user_delete"]), async (req, res) => {
     let body = req.body
     try {
-        console.log(body)
         if (!body._id) throw new CustomError(Enum.HTTP_CODES.BAD_REQUEST, "Validation Error!", "_id field must be filled!")
         let user = await Users.deleteOne({ _id: body._id })
         await UserRoles.deleteMany({ user_id: body._id })
 
-        res.status(Enum.HTTP_CODES.OK).json({success:true})
-
         Auditlogs.info(req.user?.email, "Users", "Delete", { _id: body._id })
         logger.info(req.user?.email, "Users", "Delete", JSON.stringify({ _id: body._id }))
+        res.status(Enum.HTTP_CODES.OK).json({success:true})
     } catch (error) {
         logger.error(req.user?.email, "Users", "Delete", error.message)
         let errorResponse = Response.errorResponse(error)

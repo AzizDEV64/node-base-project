@@ -45,8 +45,8 @@ class Auditlogs {
             email,location,proc_type,log
         })
     }
-    #saveToDB({level,email,location,proc_type,log}){
-        AuditLogs.create({
+    async #saveToDB({level,email,location,proc_type,log}){
+        await AuditLogs.create({
             level,email,location,proc_type,log
         })
     }

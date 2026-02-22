@@ -110,7 +110,7 @@ router.put('/update',auth.checkRoles(["role_update"]), async (req, res) => {
             res.status(errorResponse.code).json(errorResponse);
         }
     });
-router.get('/role_privileges', async (req, res) => {
+router.get('/role_privileges',  async (req, res) => {
     res.json(role_privileges)
 });
 module.exports = router;
